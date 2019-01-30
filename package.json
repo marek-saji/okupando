@@ -1,0 +1,29 @@
+{
+  "name": "okupando",
+  "version": "1.0.0",
+  "description": "Is it occupied?",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node --experimental-modules server.mjs",
+    "dev": "npx nodemon --exec 'npm start --silent'",
+    "test": "echo 'No tests, yet'; false"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DietLabs/okupando.git"
+  },
+  "keywords": [
+    "toilet",
+    "🚽",
+    "occupied"
+  ],
+  "author": "Marek ‘saji’ Augustynowicz <marek.aug@gmail.com> (http://noplacelikecode.redrice.io/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DietLabs/okupando/issues"
+  },
+  "homepage": "https://github.com/DietLabs/okupando#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}

@@ -1,0 +1,66 @@
+:root
+{
+    font-family: sans-serif;
+    font-size: 2em;
+}
+
+html,
+body,
+main
+{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+main
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+output
+{
+    display: block;
+    margin: 1rem;
+    font-size: 10vw;
+}
+
+
+[data-status]
+{
+    --status-colour: silver;
+    --status-color-inv: black;
+}
+
+[data-status="occupied"]
+{
+    --status-colour: orangered;
+}
+
+[data-status="free"]
+{
+    --status-colour: green;
+    --status-color-inv: white;
+}
+
+[data-status="error"]
+{
+    --status-colour: black;
+    --status-color-inv: white;
+}
+
+main
+{
+    color: var(--status-color-inv);
+    background-color: var(--status-colour);
+}
+
+
+#subscribe
+{
+    font-size: 1em;
+}
