@@ -1,12 +1,29 @@
-import express from 'express';
 import path from 'path';
+import fs from 'fs';
+import express from 'express';
+import * as statuses from './static/lib/statuses';
+import statusLabels from './static/lib/statusLabels';
 import pkg from './package.json';
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.resolve('./static');
 
 const app = express();
+const index = fs.readFileSync(path.join(PUBLIC_DIR, 'index.html')).toString();
 
+
+let free = 0;
+function checkStatus () // TODO Implement me
+{
+    free = (free + 1) % 2;
+    return !! free;
+}
+
+
+app.get('/check', async (req, res) => {
+    const free = await checkStatus();
+    res.json(free);
+});
 
 app.get('/manifest.json', (req, res) => {
     res.set('Content-Type', 'application/manifest+json');
@@ -41,6 +58,16 @@ app.get('/manifest.json', (req, res) => {
 
 app.get('/index.html', (req, res) => res.redirect('/'));
 
+app.get('/', (req, res) => {
+    const free = checkStatus();
+    const status = free ? statuses.FREE : statuses.OCCUPIED;
+    const thisIndex = index
+        .replace('data-state=""', `data-state="${status}"`)
+        .replace('<!-- STATE_LABEL -->', statusLabels[status]);
+    res.set('Content-Type', 'text/html');
+    res.send(thisIndex);
+});
+
 app.get('/*', (req, res) => {
     let file = req.params[0].trim('/');
     if (file === '')
@@ -53,4 +80,4 @@ app.get('/*', (req, res) => {
     );
 });
 
-app.listen(PORT, () => console.log(`Listening on http://0.0.0.0:${PORT}`));
+app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));

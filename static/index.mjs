@@ -1,14 +1,7 @@
-window.onerror = function (message) {
-    alert(message);
-};
+import * as statuses from './lib/statuses.mjs';
+import statusLabels from './lib/statusLabels.mjs';
 
 const INTERVAL = 3000;
-const STATUSES = {
-    checking: 'checking',
-    occupied: 'occupied',
-    free: 'free',
-    error: 'error',
-};
 
 const html = document.documentElement;
 const themeColor = document.querySelector('meta[name="theme-color"]');
@@ -46,16 +39,23 @@ function registerServiceWorker ()
     }
 }
 
-let statusIdx = -1;
-async function checkStatus () // TODO Implement!
+async function checkStatus ()
 {
-    const statuses = Object.values(STATUSES);
-    statusIdx = (statusIdx + 1) % statuses.length;
-    return statuses[statusIdx];
+    try
+    {
+        const free = await (await fetch('/check')).json();
+        return free ? statuses.FREE : statuses.OCCUPIED;
+    }
+    catch (error)
+    {
+        console.error('Checking status failed:', error);
+        return statuses.ERROR;
+    }
 }
 
 async function monitor ()
 {
+    reflectStatus(statuses.CHECKING);
     const status = await checkStatus();
     reflectStatus(status);
 
@@ -74,14 +74,11 @@ async function monitor ()
 function reflectStatus (status)
 {
     main.setAttribute('data-status', status);
-    output.textContent = {
-        [STATUSES.checking]: 'Sprawdzam…',
-        [STATUSES.occupied]: 'Zajęte 😨', // TODO Queue length
-        [STATUSES.free]: 'Wolne 💩',
-        [STATUSES.error]: 'Błąd 🤷',
-    }[status];
+    output.textContent = statusLabels[status];
 
-    subscribe.hidden = status !== STATUSES.occupied;
+    // TODO Queue length when occupied
+
+    subscribe.hidden = status !== statuses.OCCUPIED;
     subscribe.disabled = !! subscribed;
 
     themeColor.content = window.getComputedStyle(main).backgroundColor;
