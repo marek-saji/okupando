@@ -5,11 +5,29 @@ import * as statuses from './static/lib/statuses';
 import statusLabels from './static/lib/statusLabels';
 import pkg from './package.json';
 
-const PORT = process.env.PORT || 3000;
+
+const PORT =
+    process.env.PORT
+    || process.env.npm_config_okupando_port
+    || process.env.npm_config_port
+    || 3000;
 const PUBLIC_DIR = path.resolve('./static');
 
 const app = express();
 const index = fs.readFileSync(path.join(PUBLIC_DIR, 'index.html')).toString();
+
+
+function printUsage ()
+{
+    console.log('Options:');
+    console.log();
+    console.log(' port  Port to run HTTP daemon on. Defaults to 3000');
+    console.log();
+    console.log('You can set an option by:');
+    console.log(`1. Passing --option-name=VALUE argument`);
+    console.log(`2. Running \`npm config set okupando-option-name VALUE\``);
+    console.log(`3. Setting OPTION_NAME=VALUE environment variable.`);
+}
 
 
 let free = 0;
@@ -17,6 +35,14 @@ function checkStatus () // TODO Implement me
 {
     free = (free + 1) % 2;
     return !! free;
+}
+
+
+
+if (['-h', '--help'].includes(process.argv[2]))
+{
+    printUsage();
+    process.exit(0);
 }
 
 
