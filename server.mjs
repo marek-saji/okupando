@@ -5,6 +5,7 @@ import * as statuses from './static/lib/statuses';
 import statusLabels from './static/lib/statusLabels';
 import pkg from './package.json';
 
+const CHECK_INTERVAL = 5000;
 
 const PORT =
     process.env.PORT
@@ -30,11 +31,11 @@ function printUsage ()
 }
 
 
-let free = 0;
+let free = false;
+setInterval (() => { free = !free; }, 10000);
 function checkStatus () // TODO Implement me
 {
-    free = (free + 1) % 2;
-    return !! free;
+    return free;
 }
 
 
