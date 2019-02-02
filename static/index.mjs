@@ -1,7 +1,15 @@
 import * as statuses from './lib/statuses.mjs';
 import statusLabels from './lib/statusLabels.mjs';
+import freeNotification from './lib/freeNotification.mjs';
+import WEB_PUSH_PUBLIC_KEY from './web-push-public-key.mjs';
 
 const INTERVAL = 3000;
+
+const WEB_PUSH_SUPPORTED = (
+    typeof window.PushManager === 'function'
+    && typeof window.PushManager.prototype.subscribe === 'function'
+);
+const PUSH_SUPPORTED = WEB_PUSH_SUPPORTED;
 
 const html = document.documentElement;
 const themeColor = document.querySelector('meta[name="theme-color"]');
@@ -10,6 +18,7 @@ const output = document.getElementsByTagName('output')[0];
 const subscribe = document.getElementById('subscribe');
 
 let subscribed = false;
+let showNotificationsHere = ! WEB_PUSH_SUPPORTED;
 
 
 
@@ -63,14 +72,14 @@ async function monitor ()
     const status = await checkStatus(prevStatus);
     reflectStatus(status);
 
-    if (subscribed)
+    if (subscribed && showNotificationsHere)
     {
-        notify(); // TODO Do this in SW
+        notify();
 
         const delta = (Date.now() - subscribed) / 1000;
         trackEvent('Notification', 'shown', 'after seconds', delta);
-        subscribed = false;
     }
+    subscribed = false;
 
     setTimeout(monitor, INTERVAL);
 }
@@ -94,12 +103,50 @@ async function handleSubscribe (event)
 
     await askForNotificationPermission();
 
+    showNotificationsHere = true;
+    if (WEB_PUSH_SUPPORTED)
+    {
+        const subscription = await subscribeWebPush();
+        try
+        {
+            await registerSubscribtion(subscription);
+            showNotificationsHere = false;
+        }
+        catch (error)
+        {
+            console.error('Failed to register web push subscription, falling back to page notifications. Error:', error);
+        }
+    }
+
+    if (showNotificationsHere)
+    {
+        alert('Jeśli wyjdziesz stąd, nie dostaniesz powiadomienia.');
+    }
+
     subscribe.disabled = true;
 
     subscribed = Date.now();
     // TODO Send info to server
 
     trackEvent('Subscription', 'subscription');
+}
+
+// TODO If web-push-public-key.mjs would export Uint8Array(),
+//      we could remove this method from client code
+function urlB64ToUint8Array (base64String)
+{
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
 }
 
 async function askForNotificationPermission ()
@@ -126,15 +173,39 @@ async function askForNotificationPermission ()
     throw new Error(`Unknown notification petmission value: ${permission}`);
 }
 
+async function subscribeWebPush ()
+{
+    // TODO May be already subscribed
+    const swRegistration = await navigator.serviceWorker.ready;
+    const subscription = swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8Array(WEB_PUSH_PUBLIC_KEY),
+    })
+    return subscription;
+}
+
+async function registerSubscribtion (subscription)
+{
+    const response = await fetch('/subscribe', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(subscription),
+    });
+
+    if (response.status !== 200)
+    {
+        throw new Error(`Unexpected status on PUT /subscribe: ${response.status}`);
+    }
+}
+
 async function notify ()
 {
     const swRegistration = await navigator.serviceWorker.ready;
 
-    swRegistration.showNotification('Zwolniło się!', {
-        body: '💩',
-        icon: '/icon-512.png',
-        tag: 'free',
-    });
+    const { title, ...options } = freeNotification;
+    swRegistration.showNotification(title, options);
 }
 
 function trackEvent (

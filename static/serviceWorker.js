@@ -65,3 +65,6 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     return event.respondWith(handleFetch(event.request))
 });
+self.addEventListener('push', event => {
+    event.waitUntil(handlePush(event.data.text()));
+});

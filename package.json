@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/DietLabs/okupando#readme",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "web-push": "^3.3.3"
   }
 }
