@@ -89,7 +89,7 @@ app.get('/', (req, res) => {
     const free = checkStatus();
     const status = free ? statuses.FREE : statuses.OCCUPIED;
     const thisIndex = index
-        .replace('data-state=""', `data-state="${status}"`)
+        .replace('data-status=""', `data-status="${status}"`)
         .replace('<!-- STATE_LABEL -->', statusLabels[status]);
     res.set('Content-Type', 'text/html');
     res.send(thisIndex);

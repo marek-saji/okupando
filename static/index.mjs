@@ -22,7 +22,6 @@ function start ()
 
 function setup ()
 {
-    main.setAttribute('data-state', 'checking');
     main.hidden = false;
     subscribe.addEventListener('click', handleSubscribe);
 }
