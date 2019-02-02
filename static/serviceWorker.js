@@ -12,36 +12,47 @@ function handleActivate ()
 
 async function handleFetch (request)
 {
-    try
-    {
-        return await fetch(request);
-    }
-    catch (error)
-    {
-        return createErrorResponse(request);
-    }
+   try
+   {
+       return await fetch(request);
+   }
+   catch (error)
+   {
+       if (request.mode === 'navigate')
+       {
+           return createErrorResponse(request);
+       }
+
+       throw error;
+   }
+}
+
+function handlePush (jsonData)
+{
+    const { title, ...options } = JSON.parse(jsonData);
+    return self.registration.showNotification(title, options);
 }
 
 
 function createErrorResponse (request)
 {
-    let html;
-    if (navigator.onLine === false)
-    {
-        html = 'You are offline, yo.';
-    }
-    else
-    {
-        html = 'Not available.';
-    }
+   let html;
+   if (navigator.onLine === false)
+   {
+       html = 'You are offline, yo.';
+   }
+   else
+   {
+       html = 'Not available.';
+   }
 
-    return new Response(html, {
-        status: 200,
-        statusText: 'Service Unavailable',
-        headers: new Headers({
-            'Content-Type': 'text/html',
-        }),
-    });
+   return new Response(html, {
+       status: 200,
+       statusText: 'Service Unavailable',
+       headers: new Headers({
+           'Content-Type': 'text/html',
+       }),
+   });
 }
 
 
