@@ -6,13 +6,15 @@ import statusLabels from './static/lib/statusLabels';
 import pkg from './package.json';
 
 const CHECK_INTERVAL = 5000;
+const LONG_POLL_TRY_INTERVAL = 5000;
+const LONG_POLL_TRY_COUNT = 30000 / LONG_POLL_TRY_INTERVAL;
+const PUBLIC_DIR = path.resolve('./static');
 
 const PORT =
     process.env.PORT
     || process.env.npm_config_okupando_port
     || process.env.npm_config_port
     || 3000;
-const PUBLIC_DIR = path.resolve('./static');
 
 const app = express();
 const index = fs.readFileSync(path.join(PUBLIC_DIR, 'index.html')).toString();
@@ -35,9 +37,13 @@ let free = false;
 setInterval (() => { free = !free; }, 10000);
 function checkStatus () // TODO Implement me
 {
-    return free;
+    return free ? statuses.FREE : statuses.OCCUPIED;
 }
 
+function wait (ms)
+{
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 
 if (['-h', '--help'].includes(process.argv[2]))
@@ -48,8 +54,24 @@ if (['-h', '--help'].includes(process.argv[2]))
 
 
 app.get('/check', async (req, res) => {
-    const free = await checkStatus();
-    res.json(free);
+    // TODO Return occupation duration
+    // TODO Refactor so that multiple clients don’t multiply
+    //      checkStatus calls
+    const prevStatus = req.query.status;
+    for (
+        let tries = prevStatus ? LONG_POLL_TRY_COUNT : 1;
+        tries !== 0;
+        tries -= 1
+    )
+    {
+        const status = checkStatus();
+        if (prevStatus !== status)
+        {
+            res.json(status);
+            return;
+        }
+        await wait(LONG_POLL_TRY_INTERVAL);
+    }
 });
 
 app.get('/manifest.json', (req, res) => {

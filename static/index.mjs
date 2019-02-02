@@ -38,12 +38,17 @@ function registerServiceWorker ()
     }
 }
 
-async function checkStatus ()
+async function checkStatus (prevStatus)
 {
     try
     {
-        const free = await (await fetch('/check')).json();
-        return free ? statuses.FREE : statuses.OCCUPIED;
+        let url = '/check';
+        if (prevStatus)
+        {
+            url += `?status=${encodeURIComponent(prevStatus)}`;
+        }
+        const response = await fetch(url);
+        return await response.json();
     }
     catch (error)
     {
@@ -54,8 +59,8 @@ async function checkStatus ()
 
 async function monitor ()
 {
-    reflectStatus(statuses.CHECKING);
-    const status = await checkStatus();
+    const prevStatus = main.getAttribute('data-status');
+    const status = await checkStatus(prevStatus);
     reflectStatus(status);
 
     if (subscribed)
