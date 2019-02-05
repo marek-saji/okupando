@@ -7,9 +7,10 @@ import freeNotification from './lib/freeNotification.mjs';
 import WEB_PUSH_PUBLIC_KEY from './web-push-public-key.mjs';
 import { HTTP_STATUS_OK } from './lib/http-status-codes.mjs';
 
-const INTERVAL = 3000;
-
 const SEC_MS = 1000; // miliseconds in a second
+
+const INTERVAL = 3000;
+const NOTIFICATICATION_PERMISSION_TIMEOUT = 10000;
 
 const WEB_PUSH_SUPPORTED =
     typeof navigator.serviceWorker === 'object'
@@ -136,10 +137,21 @@ async function handleSubscribe (event)
 {
     event.preventDefault();
 
-    await askForNotificationPermission();
+    try
+    {
+        await askForNotificationPermission();
+        showNotificationsHere = false;
+    }
+    catch (error)
+    {
+        console.error(
+            'Failed to get notifications permission, falling back to page notifications. Error:',
+            error
+        );
+        showNotificationsHere = true;
+    }
 
-    showNotificationsHere = true;
-    if (WEB_PUSH_SUPPORTED)
+    if (!showNotificationsHere && WEB_PUSH_SUPPORTED)
     {
         const subscription = await subscribeWebPush();
         try
@@ -203,7 +215,16 @@ async function askForNotificationPermission ()
 
     if (permission === 'default')
     {
-        permission = await Notification.requestPermission();
+        permission = await new Promise(resolve => {
+            Notification.requestPermission().then(r => resolve(r));
+            setTimeout(
+                () => {
+                    console.error('Timed out while waiting for notification permission.');
+                    resolve('denied');
+                },
+                NOTIFICATICATION_PERMISSION_TIMEOUT
+            );
+        });
 
         trackEvent('Notification', 'request', permission);
     }
@@ -218,7 +239,7 @@ async function askForNotificationPermission ()
         throw new Error('Notification permission denied.');
     }
 
-    throw new Error(`Unknown notification petmission value: ${permission}`);
+    throw new Error(`Unknown notification permission value: ${permission}`);
 }
 
 async function subscribeWebPush ()
@@ -253,7 +274,15 @@ async function notify ()
     const swRegistration = await navigator.serviceWorker.ready;
 
     const { title, ...options } = freeNotification;
-    swRegistration.showNotification(title, options);
+
+    if (Notification.permission === 'granted')
+    {
+        swRegistration.showNotification(title, options);
+    }
+    else
+    {
+        alert(title);
+    }
 }
 
 function trackEvent (
