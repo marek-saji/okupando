@@ -4,6 +4,7 @@
   "description": "Is it occupied?",
   "main": "server.mjs",
   "scripts": {
+    "beforeinstall": "npx check-engine",
     "postinstall": "cp -v ./git-hooks/* .git/hooks/",
     "start": "node --experimental-modules server.mjs",
     "dev": "npx nodemon --exec 'npm start --silent'",
@@ -26,6 +27,9 @@
     "url": "https://github.com/DietLabs/okupando/issues"
   },
   "homepage": "https://github.com/DietLabs/okupando#readme",
+  "engines": {
+    "node": ">=8.0.0"
+  },
   "dependencies": {
     "express": "^4.16.4",
     "web-push": "^3.3.3"
