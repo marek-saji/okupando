@@ -9,6 +9,10 @@ import * as statuses from './static/lib/statuses';
 import statusLabels from './static/lib/statusLabels';
 import freeNotification from './static/lib/freeNotification';
 import {
+    addSubscription,
+    popAllSubscriptions,
+} from './lib/subscriptions';
+import {
     HTTP_STATUS_OK,
     HTTP_STATUS_BAD_REQUEST,
 } from './static/lib/http-status-codes';
@@ -53,9 +57,6 @@ const WEB_PUSH_CONFIGURED =
 
 const app = express();
 const index = fs.readFileSync(path.join(PUBLIC_DIR, 'index.html')).toString();
-
-// TODO Dump to file on exit and load on start
-const subscriptions = [];
 
 
 function printUsage ()
@@ -106,7 +107,6 @@ async function monitorStatus () {
     if (
         WEB_PUSH_CONFIGURED
         && status === statuses.FREE
-        && subscriptions.length !== 0
     )
     {
         pushNotifications();
@@ -133,10 +133,9 @@ function pushNotifications ()
         },
     };
 
-    const subs = [...subscriptions];
-    subscriptions.length = 0;
-    console.log(`Sending ${subs.length} notifications`);
-    for (const subscription of subs)
+    const subscriptions = popAllSubscriptions();
+    console.log(`Sending ${subscriptions.length} notifications`);
+    for (const subscription of subscriptions)
     {
         webPush.sendNotification(
             subscription,
@@ -145,6 +144,7 @@ function pushNotifications ()
         );
     }
 }
+
 
 app.use(express.json());
 
@@ -186,7 +186,8 @@ app.put('/subscribe', (req, res) => {
     }
 
     console.log('New subscription');
-    subscriptions.push(subscription);
+    addSubscription(subscription);
+
     res.sendStatus(HTTP_STATUS_OK);
 });
 
@@ -269,6 +270,7 @@ if (!WEB_PUSH_CONFIGURED)
         console.log('Missing web-push-email option.');
     }
 }
+
 
 monitorStatus();
 app.listen(PORT, HOST, () => console.log(`Listening on http://${HOST}:${PORT}`));

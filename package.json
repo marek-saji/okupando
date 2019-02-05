@@ -7,7 +7,7 @@
     "beforeinstall": "npx check-engine",
     "postinstall": "cp -v ./git-hooks/* .git/hooks/",
     "start": "node --experimental-modules server.mjs",
-    "dev": "npx nodemon --exec 'npm start --silent'",
+    "dev": "npx nodemon --ignore '*-dump.json' --exec 'npm start --silent'",
     "test": "echo 'No tests, yet'; false",
     "lint": "eslint --ignore-path .gitignore --ext .js --ext .mjs .",
     "lint-fix": "npm run lint -- --fix"
