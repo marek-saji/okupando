@@ -4,9 +4,12 @@
   "description": "Is it occupied?",
   "main": "server.mjs",
   "scripts": {
+    "postinstall": "cp -v ./git-hooks/* .git/hooks/",
     "start": "node --experimental-modules server.mjs",
     "dev": "npx nodemon --exec 'npm start --silent'",
-    "test": "echo 'No tests, yet'; false"
+    "test": "echo 'No tests, yet'; false",
+    "lint": "eslint --ignore-path .gitignore --ext .js --ext .mjs .",
+    "lint-fix": "npm run lint -- --fix"
   },
   "repository": {
     "type": "git",
@@ -26,5 +29,8 @@
   "dependencies": {
     "express": "^4.16.4",
     "web-push": "^3.3.3"
+  },
+  "devDependencies": {
+    "eslint": "^5.13.0"
   }
 }

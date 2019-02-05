@@ -1,7 +1,10 @@
+const HI = 100;
+const LO = 50;
+
 export default {
     title: 'Zwolniło się!',
     body: '💩',
     icon: '/icon-512.png',
     tag: 'free',
-    vibrate: [100, 50, 100],
+    vibrate: [HI, LO, HI],
 };

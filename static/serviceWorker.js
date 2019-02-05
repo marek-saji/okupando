@@ -12,19 +12,19 @@ function handleActivate ()
 
 async function handleFetch (request)
 {
-   try
-   {
-       return await fetch(request);
-   }
-   catch (error)
-   {
-       if (request.mode === 'navigate')
-       {
-           return createErrorResponse(request);
-       }
+    try
+    {
+        return await fetch(request);
+    }
+    catch (error)
+    {
+        if (request.mode === 'navigate')
+        {
+            return createErrorResponse(request);
+        }
 
-       throw error;
-   }
+        throw error;
+    }
 }
 
 function handlePush (jsonData)
@@ -34,36 +34,36 @@ function handlePush (jsonData)
 }
 
 
-function createErrorResponse (request)
+function createErrorResponse ()
 {
-   let html;
-   if (navigator.onLine === false)
-   {
-       html = 'You are offline, yo.';
-   }
-   else
-   {
-       html = 'Not available.';
-   }
+    let html;
+    if (navigator.onLine === false)
+    {
+        html = 'You are offline, yo.';
+    }
+    else
+    {
+        html = 'Not available.';
+    }
 
-   return new Response(html, {
-       status: 200,
-       statusText: 'Service Unavailable',
-       headers: new Headers({
-           'Content-Type': 'text/html',
-       }),
-   });
+    return new Response(html, {
+        status: 200,
+        statusText: 'Service Unavailable',
+        headers: new Headers({
+            'Content-Type': 'text/html',
+        }),
+    });
 }
 
 
 self.addEventListener('install', event => {
-   event.waitUntil(handleInstall());
+    event.waitUntil(handleInstall());
 });
 self.addEventListener('activate', event => {
     event.waitUntil(handleActivate());
 });
 self.addEventListener('fetch', event => {
-    return event.respondWith(handleFetch(event.request))
+    return event.respondWith(handleFetch(event.request));
 });
 self.addEventListener('push', event => {
     event.waitUntil(handlePush(event.data.text()));

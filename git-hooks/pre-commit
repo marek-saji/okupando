@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+ERROR_COUNT=0
+for FILE in $( git diff --cached --name-only --diff-filter=ACM HEAD -- '*.js' '*.mjs' )
+do
+    if ! git show ":${FILE}" | eslint --stdin --stdin-filename "${FILE}"
+    then
+        ERROR_COUNT=$(( ERROR_COUNT + 1 ))
+    fi
+done
+
+if [ "${ERROR_COUNT}" != 0 ]
+then
+    printf '\033[31mLint errors in %d files. See above for details\033m\n' "${ERROR_COUNT}"
+    exit 1
+fi

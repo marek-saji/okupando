@@ -1,23 +1,33 @@
+/* eslint-disable no-console */
+
 import path from 'path';
 import fs from 'fs';
 import express from 'express';
 import webPush from 'web-push';
+import pkg from './package.json';
 import * as statuses from './static/lib/statuses';
 import statusLabels from './static/lib/statusLabels';
 import freeNotification from './static/lib/freeNotification';
-import pkg from './package.json';
+import {
+    HTTP_STATUS_OK,
+    HTTP_STATUS_BAD_REQUEST,
+} from './static/lib/http-status-codes';
+
+const SEC_MS = 1000; // miliseconds in a second
 
 const CHECK_INTERVAL = 5000;
-const CHECK_INTERVAL_S = ~~(CHECK_INTERVAL / 1000);
+const CHECK_INTERVAL_S = ~~(CHECK_INTERVAL / SEC_MS);
 const LONG_POLL_TRY_INTERVAL = 5000;
-const LONG_POLL_TRY_COUNT = 30000 / LONG_POLL_TRY_INTERVAL;
+const HTTP_TIMEOUT = 30000;
+const LONG_POLL_TRY_COUNT = HTTP_TIMEOUT / LONG_POLL_TRY_INTERVAL;
 const PUBLIC_DIR = path.resolve('./static');
 
+const DEFAULT_PORT = 3000;
 const PORT =
     process.env.PORT
     || process.env.npm_config_okupando_port
     || process.env.npm_config_port
-    || 3000;
+    || DEFAULT_PORT;
 const WEB_PUSH_EMAIL =
     process.env.WEB_PUSH_EMAIL
     || process.env.npm_config_okupando_web_push_email
@@ -44,6 +54,7 @@ const subscriptions = [];
 
 function printUsage ()
 {
+    /* eslint-disable max-len */
     console.log('Options:');
     console.log();
     console.log(' web-push-public-key   Web Push VAPID public key');
@@ -54,17 +65,19 @@ function printUsage ()
     console.log('To generate web push vapid keys run `npx web-push generate-vapid-keys`.');
     console.log();
     console.log('You can set an option by:');
-    console.log(`1. Passing --option-name=VALUE argument`);
-    console.log(`2. Running \`npm config set okupando-option-name VALUE\``);
-    console.log(`3. Setting OPTION_NAME=VALUE environment variable.`);
+    console.log('1. Passing --option-name=VALUE argument');
+    console.log('2. Running `npm config set okupando-option-name VALUE`');
+    console.log('3. Setting OPTION_NAME=VALUE environment variable.');
+    /* eslint-enable max-len */
 }
 
 
-let free = false;
-setInterval (() => { free = !free; }, 10000);
+let isFree = false;
+// eslint-disable-next-line no-magic-numbers
+setInterval(() => { isFree = !isFree; }, 10000);
 async function checkStatus () // TODO Implement me
 {
-    return free ? statuses.FREE : statuses.OCCUPIED;
+    return isFree ? statuses.FREE : statuses.OCCUPIED;
 }
 
 function wait (ms)
@@ -73,6 +86,7 @@ function wait (ms)
 }
 
 
+// eslint-disable-next-line no-magic-numbers
 if (['-h', '--help'].includes(process.argv[2]))
 {
     printUsage();
@@ -97,7 +111,7 @@ async function monitorStatus () {
 
 function pushNotifications ()
 {
-    if (! WEB_PUSH_CONFIGURED)
+    if (!WEB_PUSH_CONFIGURED)
     {
         console.error('Called pushNotifications, but Web Push is not configured.');
         return;
@@ -110,10 +124,10 @@ function pushNotifications ()
             subject: `mailto:${WEB_PUSH_EMAIL}`,
             publicKey: WEB_PUSH_PUBLIC_KEY,
             privateKey: WEB_PUSH_PRIVATE_KEY,
-        }
+        },
     };
 
-    const subs = [ ...subscriptions ];
+    const subs = [...subscriptions];
     subscriptions.length = 0;
     console.log(`Sending ${subs.length} notifications`);
     for (const subscription of subs)
@@ -150,24 +164,24 @@ app.get('/check', async (req, res) => {
 });
 
 app.put('/subscribe', (req, res) => {
-    if (! WEB_PUSH_CONFIGURED)
+    if (!WEB_PUSH_CONFIGURED)
     {
         console.error('Requested PUT /subscribe, but Web Push is not configured.');
-        res.sendStatus(400);
+        res.sendStatus(HTTP_STATUS_BAD_REQUEST);
         return;
     }
 
     const subscription = req.body;
-    if (! subscription.endpoint || ! subscription.keys)
+    if (!subscription.endpoint || !subscription.keys)
     {
         console.error('Invalid subscription passed:', subscription);
-        res.sendStatus(400);
+        res.sendStatus(HTTP_STATUS_BAD_REQUEST);
         return;
     }
 
     console.log('New subscription');
     subscriptions.push(subscription);
-    res.sendStatus(200);
+    res.sendStatus(HTTP_STATUS_OK);
 });
 
 app.get('/manifest.json', (req, res) => {
@@ -232,19 +246,19 @@ app.get('/*', (req, res) => {
 });
 
 
-if (! WEB_PUSH_CONFIGURED)
+if (!WEB_PUSH_CONFIGURED)
 {
     console.log('Web Push not configured, continuing without it. Run with --help to see how to fix that.');
 
-    if (! WEB_PUSH_PUBLIC_KEY)
+    if (!WEB_PUSH_PUBLIC_KEY)
     {
         console.log('Missing web-push-public-key option.');
     }
-    if (! WEB_PUSH_PRIVATE_KEY)
+    if (!WEB_PUSH_PRIVATE_KEY)
     {
         console.log('Missing web-push-public-key option.');
     }
-    if (! WEB_PUSH_PRIVATE_KEY)
+    if (!WEB_PUSH_PRIVATE_KEY)
     {
         console.log('Missing web-push-email option.');
     }

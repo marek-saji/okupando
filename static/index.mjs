@@ -1,26 +1,29 @@
+/* eslint-disable no-console */
+/* global ga */
+
 import * as statuses from './lib/statuses.mjs';
 import statusLabels from './lib/statusLabels.mjs';
 import freeNotification from './lib/freeNotification.mjs';
 import WEB_PUSH_PUBLIC_KEY from './web-push-public-key.mjs';
+import { HTTP_STATUS_OK } from './lib/http-status-codes.mjs';
 
 const INTERVAL = 3000;
 
-const WEB_PUSH_SUPPORTED = (
+const SEC_MS = 1000; // miliseconds in a second
+
+const WEB_PUSH_SUPPORTED =
     typeof navigator.serviceWorker === 'object'
     && typeof window.PushManager === 'function'
-    && typeof window.PushManager.prototype.subscribe === 'function'
-);
+    && typeof window.PushManager.prototype.subscribe === 'function';
 const PUSH_SUPPORTED = WEB_PUSH_SUPPORTED;
 
-const html = document.documentElement;
 const themeColor = document.querySelector('meta[name="theme-color"]');
 const main = document.getElementsByTagName('main')[0];
 const output = document.getElementsByTagName('output')[0];
 const subscribe = document.getElementById('subscribe');
 
 let subscribed = false;
-let showNotificationsHere = ! WEB_PUSH_SUPPORTED;
-
+let showNotificationsHere = !PUSH_SUPPORTED;
 
 
 // Decide whether browser has enough cool features to enhance
@@ -109,7 +112,7 @@ async function monitor ()
     {
         notify();
 
-        const delta = (new Date() - subscribed) / 1000;
+        const delta = (new Date() - subscribed) / SEC_MS;
         trackEvent('Notification', 'shown', 'after seconds', delta);
     }
     subscribed = false;
@@ -125,7 +128,7 @@ function reflectStatus (status)
     // TODO Queue length when occupied
 
     subscribe.hidden = status !== statuses.OCCUPIED;
-    subscribe.disabled = !! subscribed;
+    subscribe.disabled = !!subscribed;
 
     themeColor.content = window.getComputedStyle(main).backgroundColor;
 }
@@ -147,7 +150,10 @@ async function handleSubscribe (event)
         }
         catch (error)
         {
-            console.error('Failed to register web push subscription, falling back to page notifications. Error:', error);
+            console.error(
+                'Failed to register web push subscription, falling back to page notifications. Error:',
+                error
+            );
         }
     }
 
@@ -168,9 +174,10 @@ async function handleSubscribe (event)
 //      we could remove this method from client code
 function urlB64ToUint8Array (base64String)
 {
+    // eslint-disable-next-line
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
-        .replace(/\-/g, '+')
+        .replace(/-/g, '+')
         .replace(/_/g, '/');
 
     const rawData = window.atob(base64);
@@ -222,7 +229,7 @@ async function subscribeWebPush ()
     const subscription = swRegistration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlB64ToUint8Array(WEB_PUSH_PUBLIC_KEY),
-    })
+    });
     return subscription;
 }
 
@@ -236,7 +243,7 @@ async function registerSubscribtion (subscription)
         body: JSON.stringify(subscription),
     });
 
-    if (response.status !== 200)
+    if (response.status !== HTTP_STATUS_OK)
     {
         throw new Error(`Unexpected status on PUT /subscribe: ${response.status}`);
     }
