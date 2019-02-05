@@ -22,7 +22,13 @@ const HTTP_TIMEOUT = 30000;
 const LONG_POLL_TRY_COUNT = HTTP_TIMEOUT / LONG_POLL_TRY_INTERVAL;
 const PUBLIC_DIR = path.resolve('./static');
 
+const DEFAULT_HOST = '0.0.0.0';
 const DEFAULT_PORT = 3000;
+const HOST =
+    process.env.HOST
+    || process.env.npm_config_okupando_host
+    || process.env.npm_config_host
+    || DEFAULT_HOST;
 const PORT =
     process.env.PORT
     || process.env.npm_config_okupando_port
@@ -265,4 +271,4 @@ if (!WEB_PUSH_CONFIGURED)
 }
 
 monitorStatus();
-app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
+app.listen(PORT, HOST, () => console.log(`Listening on http://${HOST}:${PORT}`));
