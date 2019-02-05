@@ -8,6 +8,7 @@ import freeNotification from './static/lib/freeNotification';
 import pkg from './package.json';
 
 const CHECK_INTERVAL = 5000;
+const CHECK_INTERVAL_S = ~~(CHECK_INTERVAL / 1000);
 const LONG_POLL_TRY_INTERVAL = 5000;
 const LONG_POLL_TRY_COUNT = 30000 / LONG_POLL_TRY_INTERVAL;
 const PUBLIC_DIR = path.resolve('./static');
@@ -212,7 +213,8 @@ app.get('/', async (req, res) => {
     const status = free ? statuses.FREE : statuses.OCCUPIED;
     const thisIndex = index
         .replace('data-status=""', `data-status="${status}"`)
-        .replace('<!-- STATE_LABEL -->', statusLabels[status]);
+        .replace('<!-- STATE_LABEL -->', statusLabels[status])
+        .replace('<!-- CHECK_INTERVAL -->', CHECK_INTERVAL_S);
     res.set('Content-Type', 'text/html');
     res.send(thisIndex);
 });

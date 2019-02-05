@@ -6,7 +6,8 @@ import WEB_PUSH_PUBLIC_KEY from './web-push-public-key.mjs';
 const INTERVAL = 3000;
 
 const WEB_PUSH_SUPPORTED = (
-    typeof window.PushManager === 'function'
+    typeof navigator.serviceWorker === 'object'
+    && typeof window.PushManager === 'function'
     && typeof window.PushManager.prototype.subscribe === 'function'
 );
 const PUSH_SUPPORTED = WEB_PUSH_SUPPORTED;
@@ -22,6 +23,23 @@ let showNotificationsHere = ! WEB_PUSH_SUPPORTED;
 
 
 
+// Decide whether browser has enough cool features to enhance
+// with JavaScript. Without it we are left off with simple
+// HTML page that refreshes every few seconds, which is also fine
+function isShinyEnough ()
+{
+    const body = document.body;
+    return (
+        typeof body.addEventListener === 'function'
+        && typeof body.hidden === 'boolean'
+        && typeof encodeURIComponent === 'function'
+        && typeof fetch === 'function'
+        && typeof window.getComputedStyle === 'function'
+        && typeof Uint8Array === 'function'
+        && typeof window.atob
+    );
+}
+
 function start ()
 {
     setup();
@@ -31,13 +49,28 @@ function start ()
 
 function setup ()
 {
+    document.querySelector('meta[http-equiv="refresh"]').remove();
+    window.stop();
+
     main.hidden = false;
     subscribe.addEventListener('click', handleSubscribe);
 }
 
+function isOnLocalhost ()
+{
+    return /^(localhost|127\.0\.0\.1|::1|)$/
+        .test(location.hostname.toLowerCase());
+}
+
 function registerServiceWorker ()
 {
-    if ('serviceWorker' in navigator)
+    if (
+        'serviceWorker' in navigator
+        && (
+            location.protocol === 'https:'
+            || isOnLocalhost
+        )
+    )
     {
         navigator.serviceWorker.register('/serviceWorker.js');
         window.addEventListener('beforeinstallprompt', async (event) => {
@@ -76,7 +109,7 @@ async function monitor ()
     {
         notify();
 
-        const delta = (Date.now() - subscribed) / 1000;
+        const delta = (new Date() - subscribed) / 1000;
         trackEvent('Notification', 'shown', 'after seconds', delta);
     }
     subscribed = false;
@@ -125,7 +158,7 @@ async function handleSubscribe (event)
 
     subscribe.disabled = true;
 
-    subscribed = Date.now();
+    subscribed = new Date();
     // TODO Send info to server
 
     trackEvent('Subscription', 'subscription');
@@ -151,6 +184,15 @@ function urlB64ToUint8Array (base64String)
 
 async function askForNotificationPermission ()
 {
+    if (
+        typeof Notification !== 'function'
+        || typeof Notification.permission !== 'string'
+        || typeof Notification.requestPermission !== 'function'
+    )
+    {
+        return;
+    }
+
     let permission = Notification.permission;
 
     if (permission === 'default')
@@ -236,4 +278,8 @@ function trackEvent (
     ga('send', { hitType: 'event', ...event });
 }
 
-start();
+
+if (isShinyEnough())
+{
+    start();
+}
