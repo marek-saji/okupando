@@ -55,7 +55,6 @@ function setup ()
     document.querySelector('meta[http-equiv="refresh"]').remove();
     window.stop();
 
-    main.hidden = false;
     subscribe.addEventListener('click', handleSubscribe);
 }
 
