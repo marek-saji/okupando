@@ -6,8 +6,10 @@
   "scripts": {
     "beforeinstall": "npx check-engine",
     "postinstall": "cp -v ./git-hooks/* .git/hooks/",
-    "start": "node --experimental-modules server.mjs",
-    "dev": "npx nodemon --ignore '*-dump.json' --exec 'npm start --silent'",
+    "start": "run-p start:*",
+    "start:server": "node --experimental-modules server.mjs",
+    "start:sensor": "cd sensor && ./wc-door.py",
+    "dev": "npx nodemon --ignore '*-dump.json' --ignore 'sensor' --exec 'npm start:server --silent'",
     "test": "echo 'No tests, yet'; false",
     "lint": "eslint --ignore-path .gitignore --ext .js --ext .mjs .",
     "lint-fix": "npm run lint -- --fix"

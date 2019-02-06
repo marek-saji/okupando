@@ -171,14 +171,17 @@ function pushNotifications ()
     };
 
     const subscriptions = popAllSubscriptions();
-    console.log(`Sending ${subscriptions.length} notifications`);
-    for (const subscription of subscriptions)
+    if (subscriptions.length)
     {
-        webPush.sendNotification(
-            subscription,
-            payload,
-            options
-        );
+        console.log(`Sending ${subscriptions.length} notifications`);
+        for (const subscription of subscriptions)
+        {
+            webPush.sendNotification(
+                subscription,
+                payload,
+                options
+            );
+        }
     }
 }
 
