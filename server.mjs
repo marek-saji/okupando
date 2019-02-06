@@ -92,6 +92,27 @@ function wait (ms)
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function readFile (filePath, options = {})
+{
+    if (fs.promises && fs.process.readFile)
+    {
+        return fs.promises.readFile(filePath, options);
+    }
+
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, options, (err, data) => {
+            if (err)
+            {
+                reject(err);
+            }
+            else
+            {
+                resolve(data);
+            }
+        });
+    });
+}
+
 
 // eslint-disable-next-line no-magic-numbers
 if (['-h', '--help'].includes(process.argv[2]))
@@ -102,7 +123,7 @@ if (['-h', '--help'].includes(process.argv[2]))
 
 async function checkStatus ()
 {
-    const statusRaw = (await fs.promises.readFile(STATUS_FILE_PATH, {
+    const statusRaw = (await readFile(STATUS_FILE_PATH, {
         encoding: 'utf-8',
     })).trim();
 
