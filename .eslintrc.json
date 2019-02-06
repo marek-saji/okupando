@@ -109,7 +109,7 @@
                 "ignoreTemplateLiterals": true
             }
         ],
-        "max-lines": "error",
+        "max-lines": [ "error", 500 ],
         "max-lines-per-function": "error",
         "max-nested-callbacks": "error",
         "max-params": "off",
