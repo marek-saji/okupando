@@ -15,6 +15,7 @@ import {
 import {
     HTTP_STATUS_OK,
     HTTP_STATUS_BAD_REQUEST,
+    HTTP_STATUS_SERVER_ERROR,
 } from './static/lib/http-status-codes';
 
 const SEC_MS = 1000; // miliseconds in a second
@@ -38,6 +39,10 @@ const PORT =
     || process.env.npm_config_okupando_port
     || process.env.npm_config_port
     || DEFAULT_PORT;
+const STATUS_FILE_PATH =
+    process.env.STATUS_FILE
+    || process.env.npm_config_okupando_status_file
+    || process.env.npm_config_status_file;
 const WEB_PUSH_EMAIL =
     process.env.WEB_PUSH_EMAIL
     || process.env.npm_config_okupando_web_push_email
@@ -58,6 +63,8 @@ const WEB_PUSH_CONFIGURED =
 const app = express();
 const index = fs.readFileSync(path.join(PUBLIC_DIR, 'index.html')).toString();
 
+let status;
+
 
 function printUsage ()
 {
@@ -68,6 +75,7 @@ function printUsage ()
     console.log(' web-push-private-key  Web Push VAPID public key');
     console.log(' web-push-email        Web Push e-mail address');
     console.log(' port                  Port to run HTTP daemon on. Defaults to 3000');
+    console.log(' status-file           Path to file with occupation status (0|1)');
     console.log();
     console.log('To generate web push vapid keys run `npx web-push generate-vapid-keys`.');
     console.log();
@@ -78,14 +86,6 @@ function printUsage ()
     /* eslint-enable max-len */
 }
 
-
-let isFree = false;
-// eslint-disable-next-line no-magic-numbers
-setInterval(() => { isFree = !isFree; }, 10000);
-async function checkStatus () // TODO Implement me
-{
-    return isFree ? statuses.FREE : statuses.OCCUPIED;
-}
 
 function wait (ms)
 {
@@ -100,10 +100,47 @@ if (['-h', '--help'].includes(process.argv[2]))
     process.exit(0);
 }
 
-// TODO Make this the only place checkStatus is called,
-//      others should use cached value
+async function checkStatus ()
+{
+    const statusRaw = (await fs.promises.readFile(STATUS_FILE_PATH, {
+        encoding: 'utf-8',
+    })).trim();
+
+    let newStatus;
+    if (statusRaw === '0')
+    {
+        newStatus = statuses.FREE;
+    }
+    else if (statusRaw === '1')
+    {
+        newStatus = statuses.OCCUPIED;
+    }
+    else
+    {
+        newStatus = statuses.ERROR;
+    }
+
+    if (status !== newStatus)
+    {
+        console.log('Status changed from', status, 'to', newStatus);
+    }
+
+    status = newStatus;
+    return status;
+}
+
+async function getStatus ()
+{
+    if (![statuses.FREE, status.OCCUPIED].includes(status))
+    {
+        status = await checkStatus();
+    }
+
+    return status;
+}
+
 async function monitorStatus () {
-    const status = await checkStatus();
+    checkStatus();
     if (
         WEB_PUSH_CONFIGURED
         && status === statuses.FREE
@@ -159,10 +196,14 @@ app.get('/check', async (req, res) => {
         tries -= 1
     )
     {
-        const status = await checkStatus();
-        if (prevStatus !== status)
+        const currentStatus = await getStatus();
+        if (prevStatus !== currentStatus)
         {
-            res.json(status);
+            if (currentStatus === statuses.ERROR)
+            {
+                res.status(HTTP_STATUS_SERVER_ERROR);
+            }
+            res.json(currentStatus);
             return;
         }
         await wait(LONG_POLL_TRY_INTERVAL);
@@ -230,11 +271,10 @@ app.get('/web-push-public-key.mjs', (req, res) => {
 app.get('/index.html', (req, res) => res.redirect('/'));
 
 app.get('/', async (req, res) => {
-    const free = await checkStatus();
-    const status = free ? statuses.FREE : statuses.OCCUPIED;
+    const currentStatus = await getStatus();
     const thisIndex = index
-        .replace('data-status=""', `data-status="${status}"`)
-        .replace('<!-- STATE_LABEL -->', statusLabels[status])
+        .replace('data-status=""', `data-status="${currentStatus}"`)
+        .replace('<!-- STATE_LABEL -->', statusLabels[currentStatus])
         .replace('<!-- CHECK_INTERVAL -->', CHECK_INTERVAL_S);
     res.set('Content-Type', 'text/html');
     res.send(thisIndex);
@@ -252,6 +292,14 @@ app.get('/*', (req, res) => {
     );
 });
 
+
+if (!STATUS_FILE_PATH)
+{
+    printUsage();
+    console.error();
+    console.error('Required status-file option not specified.');
+    process.exit(1);
+}
 
 if (!WEB_PUSH_CONFIGURED)
 {
