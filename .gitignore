@@ -1,3 +1,4 @@
 /node_modules
 /static/manifest.json
 /*-dump.json
+/ecosystem.config.deploy.production.js
