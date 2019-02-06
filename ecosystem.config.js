@@ -28,7 +28,7 @@ module.exports = {
             ...deployConfig,
             repo: 'https://github.com/DietLabs/okupando',
             ref: 'origin/master',
-            'post-deploy': 'npm install && pm2 reload',
+            'post-deploy': 'npm install --no-package-lock && pm2 reload okupando',
         },
     },
 };
