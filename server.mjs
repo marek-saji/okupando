@@ -128,11 +128,11 @@ async function checkStatus ()
     })).trim();
 
     let newStatus;
-    if (statusRaw === '0')
+    if (statusRaw === '1')
     {
         newStatus = statuses.FREE;
     }
-    else if (statusRaw === '1')
+    else if (statusRaw === '0')
     {
         newStatus = statuses.OCCUPIED;
     }
