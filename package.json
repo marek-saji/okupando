@@ -13,7 +13,7 @@
     "test": "echo 'No tests, yet'; false",
     "lint": "eslint --ignore-path .gitignore --ext .js --ext .mjs .",
     "lint-fix": "npm run lint -- --fix",
-    "release": "sh -c 'git pull && git pull --tags && npm version \"${@:-patch}\"&& git push && git push --tags' --",
+    "release": "sh -xec 'git pull; git pull --tags; npm version \"${@:-patch}\"; git push; git push --tags' --",
     "deploy": "sh -c 'npm run release \"${@}\" && pm2 deploy production update' --"
   },
   "repository": {
