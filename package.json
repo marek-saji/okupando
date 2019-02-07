@@ -12,7 +12,8 @@
     "dev": "npx nodemon --ignore '*-dump.json' --ignore 'sensor' --exec 'npm start:server --silent'",
     "test": "echo 'No tests, yet'; false",
     "lint": "eslint --ignore-path .gitignore --ext .js --ext .mjs .",
-    "lint-fix": "npm run lint -- --fix"
+    "lint-fix": "npm run lint -- --fix",
+    "deploy": "pm2 deploy production update"
   },
   "repository": {
     "type": "git",
