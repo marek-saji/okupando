@@ -94,7 +94,7 @@ function wait (ms)
 
 function readFile (filePath, options = {})
 {
-    if (fs.promises && fs.process.readFile)
+    if (fs.promises && fs.promises.readFile)
     {
         return fs.promises.readFile(filePath, options);
     }
