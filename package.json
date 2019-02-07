@@ -9,7 +9,7 @@
     "start": "run-p start:*",
     "start:server": "node --experimental-modules server.mjs",
     "start:sensor": "cd sensor && ./wc-door.py",
-    "dev": "npx nodemon --ignore '*-dump.json' --ignore 'sensor' --exec 'npm start:server --silent'",
+    "dev": "npx nodemon --ignore '*-dump.json' --ignore 'sensor' --exec 'npm run start:server --silent'",
     "test": "echo 'No tests, yet'; false",
     "lint": "eslint --ignore-path .gitignore --ext .js --ext .mjs .",
     "lint-fix": "npm run lint -- --fix",
