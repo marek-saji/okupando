@@ -271,15 +271,27 @@ async function registerSubscribtion (subscription)
 
 async function notify ()
 {
-    const swRegistration = await navigator.serviceWorker.ready;
-
     const { title, ...options } = freeNotification;
+    let fallbackToAlert;
 
-    if (Notification.permission === 'granted')
+    try
     {
+        const swRegistration = await navigator.serviceWorker.ready;
+
+        if (Notification.permission !== 'granted')
+        {
+            throw new Error('Notification permission not granted.');
+        }
+
         swRegistration.showNotification(title, options);
+        fallbackToAlert = false;
     }
-    else
+    catch (error)
+    {
+        fallbackToAlert = true;
+    }
+
+    if (fallbackToAlert)
     {
         alert(title);
     }
