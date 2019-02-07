@@ -8,7 +8,11 @@ is occupied or not.
 Running
 -------
 
-After usual cloning and `npm install`ing, run `npm start`.
+This will work only on Raspberry Pi, as is requires `RPi.GPIO` python
+package.
+
+After usual cloning and `npm install`ing, run
+`npm start -- --status-file=./sensor/wc-door-state`.
 
 By default server will run with no Web Push support, run
 `npm start -- --help` to see how to configure it.
@@ -17,8 +21,20 @@ By default server will run with no Web Push support, run
 Developing
 ----------
 
-Run `npm run dev` to run server that restarts on every file change.
-No browser reload at this point, though.
+First create empty `./sensor/wc-door-state` file.
+
+Run `npm run dev -- --status-file=./sensor/wc-door-state` to run server
+that restarts on every file change. No browser reload at this point,
+though. You may also want to add `--port=$PORT` to change from default
+3000.
+
+Change contents of `./sensor/wc-door-state` file to 1 and 0 to change
+status to `free` and `occupied` respectively.
+
+Testing Push notifications (which will work when accessing site on
+`localhost`), you need to configure them. See `npm start -- --help`
+for more information.
+
 
 
 License
