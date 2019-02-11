@@ -56,7 +56,10 @@ function setup ()
     document.querySelector('meta[http-equiv="refresh"]').remove();
     window.stop();
 
-    subscribe.hidden = false;
+    if (main.getAttribute('data-status') === statuses.OCCUPIED)
+    {
+        subscribe.hidden = false;
+    }
     subscribe.addEventListener('click', handleSubscribe);
 }
 
