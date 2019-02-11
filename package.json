@@ -10,9 +10,10 @@
     "start:server": "node --experimental-modules server.mjs",
     "start:sensor": "cd sensor && ./wc-door.py",
     "dev": "npx nodemon --ignore '*-dump.json' --ignore 'sensor' --exec 'npm run start:server --silent'",
-    "test": "echo 'No tests, yet'; false",
+    "test": "npm-run-all lint",
     "lint": "eslint --ignore-path .gitignore --ext .js --ext .mjs .",
     "lint-fix": "npm run lint -- --fix",
+    "prerelease": "npm test",
     "release": "sh -xec 'git pull; git pull --tags; npm version \"${@:-patch}\"; git push; git push --tags' --",
     "deploy": "sh -c 'npm run release \"${@}\" && pm2 deploy production update' --"
   },
