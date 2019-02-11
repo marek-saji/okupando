@@ -272,6 +272,7 @@ app.get('/manifest.json', (req, res) => {
         lang: 'pl-PL',
         name: pkg.name,
         short_name: pkg.name,
+        description: pkg.description,
         icons: [
             {
                 src: '/icon.svg',
@@ -310,7 +311,9 @@ app.get('/', async (req, res) => {
         // TODO theme-color
         .replace('data-status=""', `data-status="${currentStatus}"`)
         .replace('<!-- STATE_LABEL -->', statusLabels[currentStatus])
-        .replace('<!-- CHECK_INTERVAL -->', CHECK_INTERVAL_S);
+        .replace('<!-- CHECK_INTERVAL -->', CHECK_INTERVAL_S)
+        .replace('<!-- APP_NAME -->', pkg.name)
+        .replace('<!-- APP_DESCRIPTION -->', pkg.description);
     if (ENV !== 'production')
     {
         thisIndex = thisIndex.replace(
