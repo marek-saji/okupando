@@ -64,3 +64,37 @@ main
 {
     font-size: 1em;
 }
+
+
+.env-indicator
+{
+    position: fixed;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+    margin-right: 0.5ex;
+    opacity: 0.5;
+    font-weight: bold;
+    font-size: 1em;
+    font-size: 10vw;
+    hyphens: auto;
+    color: white;
+    background-color: black;
+}
+
+@media (min-width: 30rem)
+{
+    .env-indicator
+    {
+        font-size: 2rem;
+    }
+}
+
+@supports (-webkit-text-stroke: black)
+{
+    .env-indicator
+    {
+        background-color: transparent;
+        -webkit-text-stroke: black thin;
+    }
+}

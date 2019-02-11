@@ -29,6 +29,7 @@ const PUBLIC_DIR = path.resolve('./static');
 
 const DEFAULT_HOST = '0.0.0.0';
 const DEFAULT_PORT = 3000;
+const ENV = process.env.NODE_ENV || 'development';
 const HOST =
     process.env.HOST
     || process.env.npm_config_okupando_host
@@ -206,6 +207,15 @@ function pushNotifications ()
     }
 }
 
+function renderEnvIndicator (env)
+{
+    return `
+        <aside class="env-indicator">
+            ${env}
+        </aside>
+    `;
+}
+
 
 app.use(express.json());
 
@@ -296,10 +306,18 @@ app.get('/index.html', (req, res) => res.redirect('/'));
 
 app.get('/', async (req, res) => {
     const currentStatus = await getStatus();
-    const thisIndex = index
+    let thisIndex = index
+        // TODO theme-color
         .replace('data-status=""', `data-status="${currentStatus}"`)
         .replace('<!-- STATE_LABEL -->', statusLabels[currentStatus])
         .replace('<!-- CHECK_INTERVAL -->', CHECK_INTERVAL_S);
+    if (ENV !== 'production')
+    {
+        thisIndex = thisIndex.replace(
+            '</body>',
+            `${renderEnvIndicator(ENV)}</body>`
+        );
+    }
     res.set('Content-Type', 'text/html');
     res.send(thisIndex);
 });
