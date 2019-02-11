@@ -7,6 +7,7 @@ import webPush from 'web-push';
 import pkg from './package.json';
 import * as statuses from './static/lib/statuses';
 import statusLabels from './static/lib/statusLabels';
+import statusColours from './lib/statusColours';
 import freeNotification from './static/lib/freeNotification';
 import {
     addSubscription,
@@ -227,6 +228,20 @@ function renderEnvIndicator (env)
     `;
 }
 
+function renderColoursCssVars ()
+{
+    return Object.getOwnPropertyNames(statusColours).reduce(
+        (css, name) => {
+            const { bg, fg } = statusColours[name];
+            css.push(`--${name}-bg:${bg}`);
+            css.push(`--${name}-fg:${fg}`);
+            return css;
+        },
+        []
+    )
+        .join(';');
+}
+
 function indexTxt (res, currentStatus)
 {
     res.set('Content-Type', 'text/plan');
@@ -236,12 +251,13 @@ function indexTxt (res, currentStatus)
 function indexHtml (res, currentStatus)
 {
     let thisIndex = index
-        // TODO theme-color
         .replace('data-status=""', `data-status="${currentStatus}"`)
         .replace('<!-- STATE_LABEL -->', statusLabels[currentStatus])
+        .replace('<!-- STATUS_BG -->', statusColours[currentStatus].bg)
         .replace('<!-- CHECK_INTERVAL -->', CHECK_INTERVAL_S)
         .replace('<!-- APP_NAME -->', getAppName())
-        .replace('<!-- APP_DESCRIPTION -->', pkg.description);
+        .replace('<!-- APP_DESCRIPTION -->', pkg.description)
+        .replace('<body', `<body style="${renderColoursCssVars()}"`);
     if (ENV !== 'production')
     {
         thisIndex = thisIndex.replace(

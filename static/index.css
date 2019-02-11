@@ -30,33 +30,36 @@ output
 }
 
 
-[data-status]
+[data-status="checking"]
 {
-    --status-colour: silver;
-    --status-color-inv: black;
+    --status-fg: var(--checking-fg);
+    --status-bg: var(--checking-bg);
 }
 
 [data-status="occupied"]
 {
-    --status-colour: orangered;
+    --status-fg: var(--occupied-fg);
+    --status-bg: var(--occupied-bg);
 }
 
 [data-status="free"]
 {
-    --status-colour: green;
-    --status-color-inv: white;
+    --status-fg: var(--free-fg);
+    --status-bg: var(--free-bg);
 }
 
 [data-status="error"]
 {
-    --status-colour: black;
-    --status-color-inv: white;
+    --status-bg: var(--error-bg);
+    --status-fg: var(--error-fg);
 }
 
 main
 {
-    color: var(--status-color-inv);
-    background-color: var(--status-colour);
+    color: black;
+    background-color: silver;
+    color: var(--status-fg);
+    background-color: var(--status-bg);
 }
 
 
