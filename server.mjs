@@ -15,6 +15,7 @@ import {
 import {
     HTTP_STATUS_OK,
     HTTP_STATUS_BAD_REQUEST,
+    HTTP_STATUS_NOT_ACCEPTABLE,
     HTTP_STATUS_SERVER_ERROR,
 } from './static/lib/http-status-codes';
 
@@ -226,6 +227,37 @@ function renderEnvIndicator (env)
     `;
 }
 
+function indexTxt (res, currentStatus)
+{
+    res.set('Content-Type', 'text/plan');
+    res.send(currentStatus);
+}
+
+function indexHtml (res, currentStatus)
+{
+    let thisIndex = index
+        // TODO theme-color
+        .replace('data-status=""', `data-status="${currentStatus}"`)
+        .replace('<!-- STATE_LABEL -->', statusLabels[currentStatus])
+        .replace('<!-- CHECK_INTERVAL -->', CHECK_INTERVAL_S)
+        .replace('<!-- APP_NAME -->', getAppName())
+        .replace('<!-- APP_DESCRIPTION -->', pkg.description);
+    if (ENV !== 'production')
+    {
+        thisIndex = thisIndex.replace(
+            '</body>',
+            `${renderEnvIndicator(ENV)}</body>`
+        );
+    }
+    res.set('Content-Type', 'text/html');
+    res.send(thisIndex);
+}
+
+function indexJson (res, currentStatus)
+{
+    return res.json(currentStatus);
+}
+
 
 app.use(express.json());
 
@@ -247,8 +279,8 @@ app.get('/check', async (req, res) => {
             {
                 res.status(HTTP_STATUS_SERVER_ERROR);
             }
-            res.json(currentStatus);
-            return;
+            indexJson(res, currentStatus);
+            break;
         }
         await wait(LONG_POLL_TRY_INTERVAL);
     }
@@ -316,23 +348,22 @@ app.get('/web-push-public-key.mjs', (req, res) => {
 app.get('/index.html', (req, res) => res.redirect('/'));
 
 app.get('/', async (req, res) => {
-    const currentStatus = await getStatus();
-    let thisIndex = index
-        // TODO theme-color
-        .replace('data-status=""', `data-status="${currentStatus}"`)
-        .replace('<!-- STATE_LABEL -->', statusLabels[currentStatus])
-        .replace('<!-- CHECK_INTERVAL -->', CHECK_INTERVAL_S)
-        .replace('<!-- APP_NAME -->', getAppName())
-        .replace('<!-- APP_DESCRIPTION -->', pkg.description);
-    if (ENV !== 'production')
+    const renderers = {
+        text: indexTxt,
+        html: indexHtml,
+        json: indexJson,
+    };
+    const type =
+        /lynx/i.test((req.headers || {})['user-agent'] || '')
+            ? 'text' : req.accepts(Object.keys(renderers));
+
+    if (type === false)
     {
-        thisIndex = thisIndex.replace(
-            '</body>',
-            `${renderEnvIndicator(ENV)}</body>`
-        );
+        return res.sendStatus(HTTP_STATUS_NOT_ACCEPTABLE);
     }
-    res.set('Content-Type', 'text/html');
-    res.send(thisIndex);
+
+    const currentStatus = await getStatus();
+    return renderers[type](res, currentStatus);
 });
 
 app.get('/*', (req, res) => {
