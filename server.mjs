@@ -245,7 +245,7 @@ function renderColoursCssVars ()
 function indexTxt (res, currentStatus)
 {
     res.set('Content-Type', 'text/plan');
-    res.send(currentStatus);
+    res.send(`${currentStatus}\n`);
 }
 
 function indexHtml (res, currentStatus)
