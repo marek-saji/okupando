@@ -1,6 +1,6 @@
 {
   "name": "okupando",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Is it occupied?",
   "main": "server.mjs",
   "scripts": {
