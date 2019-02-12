@@ -5,4 +5,5 @@ export default {
     [statuses.OCCUPIED]: 'Zajęte 😨',
     [statuses.FREE]: 'Wolne 💩',
     [statuses.ERROR]: 'Błąd 🤷',
+    [statuses.OFFLINE]: 'Offline 🚫',
 };

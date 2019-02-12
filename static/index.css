@@ -54,6 +54,12 @@ output
     --status-fg: var(--error-fg);
 }
 
+[data-status="offline"]
+{
+    --status-bg: var(--offline-bg);
+    --status-fg: var(--offline-fg);
+}
+
 main
 {
     color: black;

@@ -18,9 +18,14 @@ async function handleFetch (request)
     }
     catch (error)
     {
-        if (request.mode === 'navigate')
+        if (request.destination === 'document')
         {
-            return createErrorResponse(request);
+            return createDocumentErrorResponse(request);
+        }
+
+        if (request.headers.get('Content-Type') === 'application/json')
+        {
+            return createJsonErrorResponse(request);
         }
 
         throw error;
@@ -34,7 +39,7 @@ function handlePush (jsonData)
 }
 
 
-function createErrorResponse ()
+function createDocumentErrorResponse ()
 {
     let html;
     if (navigator.onLine === false)
@@ -51,6 +56,26 @@ function createErrorResponse ()
         statusText: 'Service Unavailable',
         headers: new Headers({
             'Content-Type': 'text/html',
+        }),
+    });
+}
+
+function createJsonErrorResponse ()
+{
+    let json;
+    if (navigator.onLine === false)
+    {
+        json = 'offline';
+    }
+    else
+    {
+        json = 'error';
+    }
+
+    return new Response(JSON.stringify(json), {
+        status: 200,
+        headers: new Headers({
+            'Content-Type': 'application/json',
         }),
     });
 }

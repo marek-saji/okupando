@@ -96,7 +96,9 @@ async function checkStatus (prevStatus)
         {
             url += `?status=${encodeURIComponent(prevStatus)}`;
         }
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: { 'Content-Type': 'application/json' },
+        });
         return await response.json();
     }
     catch (error)
