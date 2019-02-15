@@ -278,6 +278,8 @@ function indexJson (res, currentStatus)
 app.use(express.json());
 
 app.get('/check', async (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+
     // TODO Return occupation duration
     // TODO Refactor so that multiple clients don’t multiply
     //      checkStatus calls
@@ -382,6 +384,8 @@ app.get('/', async (req, res) => {
     {
         return res.sendStatus(HTTP_STATUS_NOT_ACCEPTABLE);
     }
+
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
 
     const currentStatus = await getStatus();
     return renderers[type](res, currentStatus);
