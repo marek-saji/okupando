@@ -65,11 +65,15 @@ function createJsonErrorResponse ()
     let json;
     if (navigator.onLine === false)
     {
-        json = 'offline';
+        json = {
+            status: 'offline',
+        };
     }
     else
     {
-        json = 'error';
+        json = {
+            status: 'error',
+        };
     }
 
     return new Response(JSON.stringify(json), {
