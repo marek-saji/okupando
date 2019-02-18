@@ -21,6 +21,12 @@ module.exports = {
         {
             name: 'okupando',
             script: 'server.mjs',
+            env_development: {
+                NODE_ENV: 'development',
+            },
+            env_production: {
+                NODE_ENV: 'production',
+            },
         },
     ],
     deploy: {
@@ -28,7 +34,7 @@ module.exports = {
             ...deployConfig,
             repo: 'https://github.com/DietLabs/okupando',
             ref: 'origin/master',
-            'post-deploy': 'npm install --no-package-lock && pm2 reload ./ecosystem.config.js',
+            'post-deploy': 'npm install --no-package-lock && pm2 reload --env=production ./ecosystem.config.js',
         },
     },
 };
