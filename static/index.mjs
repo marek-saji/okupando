@@ -99,7 +99,8 @@ async function checkStatus (prevStatus)
         const response = await fetch(url, {
             headers: { 'Content-Type': 'application/json' },
         });
-        return await response.json();
+        const data = await response.json();
+        return data.status;
     }
     catch (error)
     {
