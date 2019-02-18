@@ -68,7 +68,7 @@
             "error",
             "declaration"
         ],
-        "function-paren-newline": "error",
+        "function-paren-newline": [ "error", "consistent" ],
         "generator-star-spacing": "error",
         "global-require": "error",
         "guard-for-in": "error",
@@ -331,5 +331,11 @@
             "error",
             "never"
         ]
+    },
+    "overrides": {
+        "files": ["server.mjs", "lib/**/*.mjs"],
+        "rules": {
+            "no-console": "off"
+        }
     }
 }
