@@ -33,7 +33,7 @@ module.exports = {
         production: {
             ...deployConfig,
             repo: 'https://github.com/DietLabs/okupando',
-            ref: 'origin/master',
+            ref: 'origin/refactor',
             'post-deploy': 'npm install --no-package-lock && pm2 reload --env=production ./ecosystem.config.js',
         },
     },
