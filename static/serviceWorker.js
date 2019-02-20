@@ -12,30 +12,11 @@ function handleActivate ()
 
 async function handleFetch (request)
 {
-    // New request with additional header
-    const newRequest = new Request(
-        request.url,
-        {
-            method: request.method,
-            headers: {
-                ...Array.from(request.headers.entries())
-                    .reduce(
-                        (h, [name, value]) => ({ ...h, [name]: value }),
-                        {}
-                    ),
-                'X-JS': '1',
-            },
-            // request.mode may be 'navigation' which we cannot use
-            mode: 'same-origin',
-            credentials: request.credentials,
-            // Let browser handle redirects
-            redirect: 'manual',
-        }
-    );
-
     try
     {
-        return await fetch(newRequest);
+        return await fetch(
+            isRequestHtml(request) ? injectJsHeader(request) : request
+        );
     }
     catch (error)
     {
@@ -79,6 +60,39 @@ function createDocumentErrorResponse ()
             'Content-Type': 'text/html',
         }),
     });
+}
+
+function isRequestHtml (request)
+{
+    return (
+        request.url === '/'
+        // eslint-disable-next-line no-magic-numbers
+        || request.url.indexOf('.html') !== -1
+    );
+}
+
+function injectJsHeader (request)
+{
+    // New request with additional header
+    return new Request(
+        request.url,
+        {
+            method: request.method,
+            headers: {
+                ...Array.from(request.headers.entries())
+                    .reduce(
+                        (h, [name, value]) => ({ ...h, [name]: value }),
+                        {}
+                    ),
+                'X-JS': '1',
+            },
+            // request.mode may be 'navigation' which we cannot use
+            mode: 'same-origin',
+            credentials: request.credentials,
+            // Let browser handle redirects
+            redirect: 'manual',
+        }
+    );
 }
 
 function createJsonErrorResponse ()
