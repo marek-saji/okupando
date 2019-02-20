@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-/* global ga */
+/* global ga,safari */
 
 import * as statuses from './lib/statuses.mjs';
 import statusLabels from './lib/statusLabels.mjs';
@@ -11,6 +11,8 @@ const SEC_MS = 1000; // miliseconds in a second
 
 const INTERVAL = 3000;
 const NOTIFICATICATION_PERMISSION_TIMEOUT = 10000;
+
+const APN_ID = 'web.pl.dietlabs.okupando';
 
 const WEB_PUSH_SUPPORTED =
     typeof navigator.serviceWorker === 'object'
@@ -213,23 +215,66 @@ function urlB64ToUint8Array (base64String)
     return outputArray;
 }
 
-async function askForNotificationPermission ()
+function getNotificationPermission ()
 {
     if (
-        typeof Notification !== 'function'
-        || typeof Notification.permission !== 'string'
-        || typeof Notification.requestPermission !== 'function'
+        typeof Notification === 'function'
+        && typeof Notification.permission === 'string'
     )
     {
-        return;
+        return Notification.permission;
     }
 
-    let permission = Notification.permission;
+    if (
+        typeof safari === 'object'
+        && typeof safari.pushNotification === 'object'
+        && typeof safari.pushNotification.permission === 'function'
+    )
+    {
+        return safari.pushNotification.permission(APN_ID).permission;
+    }
+
+    throw new Error('Notifications not supported.');
+}
+
+function requestNotificationPermission ()
+{
+    if (
+        typeof Notification === 'function'
+        && typeof Notification.requestPermission === 'function'
+    )
+    {
+        return Notification.requestPermission();
+    }
+
+    if (
+        typeof safari === 'object'
+        && typeof safari.pushNotification === 'object'
+        && typeof safari.pushNotification.requestPermission === 'function'
+    )
+    {
+        return new Promise((resolve) => {
+            safari.pushNotification.requestPermission(
+                `${location.origin}${location.pathname}`,
+                APN_ID,
+                {},
+                () => resolve()
+            );
+        });
+    }
+
+    throw new Error('Notifications not supported.');
+}
+
+async function askForNotificationPermission ()
+{
+    let permission = getNotificationPermission();
 
     if (permission === 'default')
     {
         permission = await new Promise(resolve => {
-            Notification.requestPermission().then(r => resolve(r));
+            requestNotificationPermission().then(r => resolve(r));
+
             setTimeout(
                 () => {
                     console.error('Timed out while waiting for notification permission.');
