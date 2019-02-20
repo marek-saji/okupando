@@ -53,8 +53,14 @@ function start ()
 
 function setup ()
 {
-    document.querySelector('meta[http-equiv="refresh"]').remove();
-    window.stop();
+    if (document.querySelector('meta[http-equiv="refresh"]'))
+    {
+        document.cookie = [
+            'JS=1',
+            'path=/',
+        ].join(';');
+        window.location.reload(true);
+    }
 
     if (main.getAttribute('data-status') === statuses.OCCUPIED)
     {
