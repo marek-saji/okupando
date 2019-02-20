@@ -12,9 +12,30 @@ function handleActivate ()
 
 async function handleFetch (request)
 {
+    // New request with additional header
+    const newRequest = new Request(
+        request.url,
+        {
+            method: request.method,
+            headers: {
+                ...Array.from(request.headers.entries())
+                    .reduce(
+                        (h, [name, value]) => ({ ...h, [name]: value }),
+                        {}
+                    ),
+                'X-JS': '1',
+            },
+            // request.mode may be 'navigation' which we cannot use
+            mode: 'same-origin',
+            credentials: request.credentials,
+            // Let browser handle redirects
+            redirect: 'manual',
+        }
+    );
+
     try
     {
-        return await fetch(request);
+        return await fetch(newRequest);
     }
     catch (error)
     {
