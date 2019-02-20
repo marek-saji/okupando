@@ -8,33 +8,26 @@ is occupied or not.
 Running
 -------
 
-This will work only on Raspberry Pi, as is requires `RPi.GPIO` python
-package.
+You need to run it on Raspberry Pi.
 
 After usual cloning and `npm install`ing, run
-`npm start -- --status-file=./sensor/wc-door-state`.
+`npm start -- --gpio-channel CHANNEL_NO`, where `CHANNEL_NO` is
+Raspberry Pi pin in RPI (not BCM) mode where you have your button
+plugged in.
 
-By default server will run with no Web Push support, run
-`npm start -- --help` to see how to configure it.
+By default server will run with no HTTPS and push notifications,
+run `npm start -- --help` to see how to configure those.
 
 
 Developing
 ----------
 
-First create empty `./sensor/wc-door-state` file.
+Running server with no `--gpio-channel` and `NODE_ENV=development` will
+start debug mode when you can change status with keypresses.
+Run `npm run dev` to run server that restarts on every file change.
+No browser reload at this point, though.
 
-Run `npm run dev -- --status-file=./sensor/wc-door-state` to run server
-that restarts on every file change. No browser reload at this point,
-though. You may also want to add `--port=$PORT` to change from default
-3000.
-
-Change contents of `./sensor/wc-door-state` file to 1 and 0 to change
-status to `free` and `occupied` respectively.
-
-Testing Push notifications (which will work when accessing site on
-`localhost`), you need to configure them. See `npm start -- --help`
-for more information.
-
+Run `npm start -- --help` for all available options.
 
 
 License

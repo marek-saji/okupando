@@ -1,40 +1,85 @@
+import { getEnv } from './lib/utils';
 import createHttpsApp from './lib/express/greenlock';
 import './lib/cli-env';
 import { values as args } from './lib/args-definitions';
 import app from './lib/express';
-import { monitorStatus } from './lib/push';
+import * as statuses from './static/lib/statuses';
+import { setStatus } from './lib/status';
+import { notifyAboutFree } from './lib/push';
+import {
+    createStatusObserver as createGpioStatusObserver,
+} from './lib/status/observer/gpio';
+import {
+    createStatusObserver as createDebugStatusObserver,
+} from './lib/status/observer/debug';
+
+const ENV = getEnv();
 
 
-monitorStatus();
-
-if (args.HTTPS_PORT)
+async function startStatusObserver ()
 {
-    createHttpsApp(app).listen(
-        args.HTTP_PORT,
-        args.HTTPS_PORT,
-        () => {
-            console.log(
-                'HTTP',
-                'Listening on',
-                `http://${args.HOST}:${args.HTTP_PORT}`,
-            );
-        },
-        () => {
-            console.log(
-                'HTTP',
-                'Listening on',
-                `https://${args.HOST}:${args.HTTPS_PORT}`
-            );
-        },
-    );
-}
-else
-{
-    app.listen(args.HTTP_PORT, args.HOST, () => {
-        console.log(
-            'HTTP',
-            'Listening on',
-            `http://${args.HOST}:${args.HTTP_PORT}`
-        );
+    let statusObserver;
+
+    if (args.GPIO_CHANNEL)
+    {
+        statusObserver = await createGpioStatusObserver({
+            channel: args.GPIO_CHANNEL,
+        });
+    }
+    else if (ENV === 'development')
+    {
+        console.info('Using debug development status change observer.');
+        statusObserver = await createDebugStatusObserver();
+    }
+    else
+    {
+        throw new Error('GPIO_CHANNEL not configured');
+    }
+
+    statusObserver.on('change', ({ status }) => {
+        setStatus(status);
+
+        if (status === statuses.FREE)
+        {
+            notifyAboutFree();
+        }
     });
 }
+
+function startHttpServer ()
+{
+    if (args.HTTPS_PORT)
+    {
+        createHttpsApp(app).listen(
+            args.HTTP_PORT,
+            args.HTTPS_PORT,
+            () => {
+                console.log(
+                    'HTTP',
+                    'Listening on',
+                    `http://${args.HOST}:${args.HTTP_PORT}`,
+                );
+            },
+            () => {
+                console.log(
+                    'HTTP',
+                    'Listening on',
+                    `https://${args.HOST}:${args.HTTPS_PORT}`
+                );
+            },
+        );
+    }
+    else
+    {
+        app.listen(args.HTTP_PORT, args.HOST, () => {
+            console.log(
+                'HTTP',
+                'Listening on',
+                `http://${args.HOST}:${args.HTTP_PORT}`
+            );
+        });
+    }
+}
+
+startStatusObserver();
+startHttpServer();
