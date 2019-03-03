@@ -7,7 +7,7 @@
     "beforeinstall": "npx check-engine",
     "postinstall": "cp -v ./git-hooks/* .git/hooks/",
     "start": "node --experimental-modules server.mjs",
-    "dev": "npx chokidar --silent --initial --ignore node_modules/ --ignore .git --ignore subscriptions-dump.json . --command 'NODE_ENV=development npm start'",
+    "dev": "npx chokidar --silent --initial --ignore node_modules/ --ignore .git . --command 'NODE_ENV=development npm start'",
     "test": "npm-run-all lint",
     "lint": "eslint --ignore-path .gitignore --ext .js --ext .mjs .",
     "lint-fix": "npm run lint -- --fix",
@@ -34,6 +34,7 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
+    "cachedir": "^2.1.0",
     "cookie-parser": "^1.4.4",
     "express": "^4.16.4",
     "gpio": "^0.2.10",

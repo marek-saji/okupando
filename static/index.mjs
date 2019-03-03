@@ -343,14 +343,16 @@ async function subscribeWebPush ()
 async function registerSubscription (subscription)
 {
     const clientId = getClientId();
-    const response = await fetch('/subscribe', {
+    const response = await fetch('/queue', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
             clientId,
-            subscription,
+            data: {
+                subscription,
+            },
         }),
     });
 

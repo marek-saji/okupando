@@ -5,6 +5,7 @@ import { values as args } from './lib/args-definitions';
 import app from './lib/express';
 import * as statuses from './static/lib/statuses';
 import { setStatus } from './lib/status';
+import queue from './lib/queue';
 import { notifyAboutFree } from './lib/push';
 import {
     createStatusObserver as createGpioStatusObserver,
@@ -41,7 +42,14 @@ async function startStatusObserver ()
 
         if (status === statuses.FREE)
         {
-            notifyAboutFree();
+            queue.emit('status-change', { status });
+        }
+    });
+
+    queue.on('shift', ({ data: { subscription } }) => {
+        if (subscription)
+        {
+            notifyAboutFree(subscription);
         }
     });
 }
