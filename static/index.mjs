@@ -24,6 +24,7 @@ const main = document.getElementsByTagName('main')[0];
 const output = document.getElementsByTagName('output')[0];
 const subscribe = document.getElementById('subscribe');
 
+let version;
 let subscribed = false;
 let showNotificationsHere = !PUSH_SUPPORTED;
 
@@ -100,6 +101,22 @@ function registerServiceWorker ()
     }
 }
 
+function reloadOnVersionChange (newVersion)
+{
+    if (!newVersion)
+    {
+        return;
+    }
+
+    if (version && newVersion !== version)
+    {
+        console.log('New version detected — reloading');
+        window.location.reload();
+    }
+
+    version = newVersion;
+}
+
 async function checkStatus (prevStatus)
 {
     try
@@ -113,6 +130,7 @@ async function checkStatus (prevStatus)
             headers: { 'Content-Type': 'application/json' },
         });
         const data = await response.json();
+        reloadOnVersionChange(data.version);
         return data.status;
     }
     catch (error)
