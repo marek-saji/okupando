@@ -1,4 +1,4 @@
-import greenlock from 'greenlock-express';
+import createHttpsApp from './lib/express/greenlock';
 import './lib/cli-env';
 import { values as args } from './lib/args-definitions';
 import app from './lib/express';
@@ -9,18 +9,7 @@ monitorStatus();
 
 if (args.HTTPS_PORT)
 {
-    greenlock.create({
-        server: 'https://acme-v02.api.letsencrypt.org/directory',
-        version: 'draft-11',
-        email: args.ACME_EMAIL,
-        configDir: '~/.config/acme',
-        agreeTos: true,
-        communityMember: false,
-        telemetry: true,
-        servername: args.HOST,
-        approveDomains: [args.HOST],
-        app,
-    }).listen(
+    createHttpsApp(app).listen(
         args.HTTP_PORT,
         args.HTTPS_PORT,
         () => {
