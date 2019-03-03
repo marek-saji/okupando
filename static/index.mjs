@@ -11,6 +11,7 @@ const SEC_MS = 1000; // miliseconds in a second
 
 const INTERVAL = 3000;
 const NOTIFICATICATION_PERMISSION_TIMEOUT = 10000;
+const COOKIE_TTL = 31536000; // 1 year
 
 const WEB_PUSH_SUPPORTED =
     typeof navigator.serviceWorker === 'object'
@@ -41,6 +42,9 @@ function isShinyEnough ()
         && typeof window.getComputedStyle === 'function'
         && typeof Uint8Array === 'function'
         && typeof window.atob
+        && typeof window.localStorage === 'object'
+        && typeof window.localStorage.getItem === 'function'
+        && typeof window.localStorage.setItem === 'function'
     );
 }
 
@@ -147,6 +151,31 @@ function reflectStatus (status)
     subscribe.disabled = !!subscribed;
 
     themeColor.content = window.getComputedStyle(main).backgroundColor;
+}
+
+function saveClientId (id)
+{
+    const value = encodeURIComponent(getClientId() || id);
+    document.cookie = `ClientId=${value}; path=/; max-age=${COOKIE_TTL}`;
+}
+
+function getClientId ()
+{
+    return getCookies().get('ClientId');
+}
+
+function getCookies ()
+{
+    return new Map(
+        document.cookie
+            .split(';')
+            .map(
+                c => c
+                    .trim()
+                    .split('=')
+                    .map(decodeURIComponent)
+            )
+    );
 }
 
 async function handleSubscribe (event)
@@ -261,18 +290,26 @@ async function askForNotificationPermission ()
 async function getWebPushSubscription ()
 {
     const swRegistration = await navigator.serviceWorker.ready;
-    const { pushManager } = swRegistration;
-    return pushManager.getSubscription();
+    const subscription = await swRegistration.pushManager.getSubscription();
+    if (subscription)
+    {
+        saveClientId(subscription.endpoint);
+    }
+    return subscription;
 }
 
 async function createWebPushSubscription ()
 {
     const swRegistration = await navigator.serviceWorker.ready;
-    const { pushManager } = swRegistration;
-    return pushManager.subscribe({
+    const subscription = await swRegistration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlB64ToUint8Array(WEB_PUSH_PUBLIC_KEY),
     });
+    if (subscription)
+    {
+        saveClientId(subscription.endpoint);
+    }
+    return subscription;
 }
 
 async function subscribeWebPush ()
@@ -287,12 +324,16 @@ async function subscribeWebPush ()
 
 async function registerSubscription (subscription)
 {
+    const clientId = getClientId();
     const response = await fetch('/subscribe', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(subscription),
+        body: JSON.stringify({
+            clientId,
+            subscription,
+        }),
     });
 
     if (response.status !== HTTP_STATUS_OK)
