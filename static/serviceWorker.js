@@ -1,3 +1,5 @@
+/* eslint-env serviceworker */
+
 'use strict';
 
 function handleInstall ()
@@ -34,10 +36,19 @@ async function handleFetch (request)
     }
 }
 
-function handlePush (jsonData)
+async function handlePush (jsonData)
 {
-    const { title, ...options } = JSON.parse(jsonData);
-    return self.registration.showNotification(title, options);
+    const {
+        status,
+        notification: { title, ...options },
+    } = JSON.parse(jsonData);
+    self.registration.showNotification(title, options);
+
+    (await clients.matchAll({ type: 'window' })).forEach(client => {
+        client.postMessage({
+            status,
+        });
+    });
 }
 
 

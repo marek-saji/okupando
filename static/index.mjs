@@ -24,6 +24,8 @@ const main = document.getElementsByTagName('main')[0];
 const output = document.getElementsByTagName('output')[0];
 const subscribe = document.getElementById('subscribe');
 
+const checkAbortController = AbortController && new AbortController();
+
 let version;
 let subscribed = false;
 let showNotificationsHere = !PUSH_SUPPORTED;
@@ -40,6 +42,7 @@ function isShinyEnough ()
         && typeof body.hidden === 'boolean'
         && typeof encodeURIComponent === 'function'
         && typeof fetch === 'function'
+        && typeof window.AbortController === 'function'
         && typeof window.getComputedStyle === 'function'
         && typeof Uint8Array === 'function'
         && typeof window.atob
@@ -98,6 +101,19 @@ function registerServiceWorker ()
             const result = await event.userChoice;
             trackEvent('ServiceWorker', 'installation', result.outcome);
         });
+
+        navigator.serviceWorker.addEventListener('message', handleSwMessage);
+    }
+}
+
+function handleSwMessage ({ data })
+{
+    const { status } = data;
+
+    if (status)
+    {
+        checkAbortController.abort();
+        reflectStatus(status);
     }
 }
 
@@ -128,6 +144,7 @@ async function checkStatus (prevStatus)
         }
         const response = await fetch(url, {
             headers: { 'Content-Type': 'application/json' },
+            signal: checkAbortController.signal,
         });
         const data = await response.json();
         reloadOnVersionChange(data.version);
@@ -135,6 +152,12 @@ async function checkStatus (prevStatus)
     }
     catch (error)
     {
+        if (error.name === 'AbortError')
+        {
+            // Fetch aborted using checkAbortController, ignore
+            return null;
+        }
+
         console.error('Checking status failed:', error);
         return statuses.ERROR;
     }
@@ -144,16 +167,24 @@ async function monitor ()
 {
     const prevStatus = main.getAttribute('data-status');
     const status = await checkStatus(prevStatus);
-    reflectStatus(status);
 
-    if (subscribed && showNotificationsHere)
+    if (status !== null)
     {
-        notify();
+        reflectStatus(status);
 
-        const delta = (new Date() - subscribed) / SEC_MS;
-        trackEvent('Notification', 'shown', 'after seconds', delta);
+        if (
+            status === statuses.FREE
+            && subscribed
+            && showNotificationsHere
+        )
+        {
+            notify();
+
+            const delta = (new Date() - subscribed) / SEC_MS;
+            trackEvent('Notification', 'shown', 'after seconds', delta);
+            subscribed = false;
+        }
     }
-    subscribed = false;
 
     setTimeout(monitor, INTERVAL);
 }
