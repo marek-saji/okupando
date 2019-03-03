@@ -67,6 +67,9 @@ function setup ()
         subscribe.hidden = false;
     }
     subscribe.addEventListener('click', handleSubscribe);
+
+    // TODO Make sure server also known that we are subscribed
+    getWebPushSubscription().then(sub => { subscribe.disabled = !!sub; });
 }
 
 function isOnLocalhost ()
@@ -255,14 +258,30 @@ async function askForNotificationPermission ()
     throw new Error(`Unknown notification permission value: ${permission}`);
 }
 
-async function subscribeWebPush ()
+async function getWebPushSubscription ()
 {
-    // TODO May be already subscribed
     const swRegistration = await navigator.serviceWorker.ready;
-    const subscription = swRegistration.pushManager.subscribe({
+    const { pushManager } = swRegistration;
+    return pushManager.getSubscription();
+}
+
+async function createWebPushSubscription ()
+{
+    const swRegistration = await navigator.serviceWorker.ready;
+    const { pushManager } = swRegistration;
+    return pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlB64ToUint8Array(WEB_PUSH_PUBLIC_KEY),
     });
+}
+
+async function subscribeWebPush ()
+{
+    let subscription = await getWebPushSubscription();
+    if (!subscription)
+    {
+        subscription = await createWebPushSubscription();
+    }
     return subscription;
 }
 
