@@ -1,7 +1,7 @@
 {
   "name": "okupando",
   "version": "1.0.5",
-  "description": "Is it occupied?",
+  "description": "Is it occupied? 🚽🐼",
   "main": "server.mjs",
   "scripts": {
     "beforeinstall": "npx check-engine",
