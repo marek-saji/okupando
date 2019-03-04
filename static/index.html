@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="pl-PL">
+<html lang="pl-PL" prefix="og: http://ogp.me/ns#">
   <head>
     <meta charset="utf-8">
+    <link rel="manifest" href="./manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><!-- APP_NAME --></title>
     <meta name="description" content="<!-- APP_DESCRIPTION -->">
-    <link rel="manifest" href="./manifest.json">
+    <meta property="og:url" content="<!-- BASE_URL -->">
+    <meta property="og:title" content="<!-- APP_NAME -->">
+    <meta property="og:description" content="<!-- APP_DESCRIPTION -->">
+    <meta property="og:image" content="<!-- BASE_URL -->icon-512.png">
     <link rel="icon" type="image/png" href="./icon-32.png">
     <meta name="theme-color" content="<!-- STATUS_BG -->">
     <meta http-equiv="refresh" content="<!-- CHECK_INTERVAL -->">
@@ -13,9 +17,9 @@
   </head>
 
   <body>
-    <main data-status="">
+    <main data-status="<!-- STATUS -->">
       <output aria-live="polite" class="state">
-        <!-- STATE_LABEL -->
+        <!-- STATUS_LABEL -->
       </output>
       <button type=button id=subscribe hidden>
         Daj znać, jak będzie wolne
