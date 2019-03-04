@@ -72,12 +72,11 @@ function setup ()
         window.location.reload(true);
     }
 
+    subscribed = subscribe.disabled;
+
     const status = main.getAttribute('data-status');
     reflectStatus(status);
     subscribe.addEventListener('click', handleSubscribe);
-
-    // TODO Make sure server also known that we are subscribed
-    getWebPushSubscription().then(sub => { subscribe.disabled = !!sub; });
 }
 
 function isOnLocalhost ()
