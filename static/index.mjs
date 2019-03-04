@@ -13,6 +13,8 @@ const INTERVAL = 3000;
 const NOTIFICATICATION_PERMISSION_TIMEOUT = 10000;
 const COOKIE_TTL = 31536000; // 1 year
 
+const TITLE = document.title;
+
 const WEB_PUSH_SUPPORTED =
     typeof navigator.serviceWorker === 'object'
     && typeof window.PushManager === 'function'
@@ -70,10 +72,8 @@ function setup ()
         window.location.reload(true);
     }
 
-    if (main.getAttribute('data-status') === statuses.OCCUPIED)
-    {
-        subscribe.hidden = false;
-    }
+    const status = main.getAttribute('data-status');
+    reflectStatus(status);
     subscribe.addEventListener('click', handleSubscribe);
 
     // TODO Make sure server also known that we are subscribed
@@ -191,10 +191,11 @@ async function monitor ()
 
 function reflectStatus (status)
 {
-    main.setAttribute('data-status', status);
-    output.textContent = statusLabels[status];
+    const name = statusLabels[status];
 
-    // TODO Queue length when occupied
+    main.setAttribute('data-status', status);
+    output.textContent = name;
+    document.title = `${name} ✦ ${TITLE}`;
 
     subscribe.hidden = status !== statuses.OCCUPIED;
     subscribe.disabled = !!subscribed;
