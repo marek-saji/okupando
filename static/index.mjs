@@ -162,7 +162,7 @@ async function handleSubscribe (event)
         const subscription = await subscribeWebPush();
         try
         {
-            await registerSubscribtion(subscription);
+            await registerSubscription(subscription);
             showNotificationsHere = false;
         }
         catch (error)
@@ -259,7 +259,7 @@ async function subscribeWebPush ()
     return subscription;
 }
 
-async function registerSubscribtion (subscription)
+async function registerSubscription (subscription)
 {
     const response = await fetch('/subscribe', {
         method: 'PUT',
