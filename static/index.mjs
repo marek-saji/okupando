@@ -70,6 +70,7 @@ function setup ()
             'path=/',
         ].join(';');
         window.location.reload(true);
+        return;
     }
 
     subscribed = subscribe.disabled;
