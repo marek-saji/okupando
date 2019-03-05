@@ -11,7 +11,6 @@ const SEC_MS = 1000; // miliseconds in a second
 
 const INTERVAL = 3000;
 const NOTIFICATICATION_PERMISSION_TIMEOUT = 10000;
-const COOKIE_TTL = 31536000; // 1 year
 
 const TITLE = document.title;
 
@@ -203,15 +202,14 @@ function reflectStatus (status)
     themeColor.content = window.getComputedStyle(main).backgroundColor;
 }
 
-function saveClientId (id)
-{
-    const value = encodeURIComponent(getClientId() || id);
-    document.cookie = `ClientId=${value}; path=/; max-age=${COOKIE_TTL}`;
-}
-
 function getClientId ()
 {
-    return getCookies().get('ClientId');
+    const clientId = getCookies().get('ClientId');
+    if (!clientId)
+    {
+        throw Error('Failed to get client id. It should be set in the cookie.');
+    }
+    return clientId;
 }
 
 function getCookies ()
@@ -341,10 +339,6 @@ async function getWebPushSubscription ()
 {
     const swRegistration = await navigator.serviceWorker.ready;
     const subscription = await swRegistration.pushManager.getSubscription();
-    if (subscription)
-    {
-        saveClientId(subscription.endpoint);
-    }
     return subscription;
 }
 
@@ -355,10 +349,6 @@ async function createWebPushSubscription ()
         userVisibleOnly: true,
         applicationServerKey: urlB64ToUint8Array(WEB_PUSH_PUBLIC_KEY),
     });
-    if (subscription)
-    {
-        saveClientId(subscription.endpoint);
-    }
     return subscription;
 }
 
