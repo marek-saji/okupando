@@ -47,6 +47,19 @@ No browser reload at this point, though.
 Run `npm start -- --help` for all available options.
 
 
+Contributing
+------------
+
+See our [contributing guidelines](./CONTRIBUTING.md).
+
+
+Code of conduct
+---------------
+
+We have adapted [Contributor Covenant](./CODE_OF_CONDUCT.md) code of
+conduct.
+
+
 License
 -------
 
