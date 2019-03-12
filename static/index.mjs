@@ -274,25 +274,6 @@ async function handleSubscribe (event)
     trackEvent('Subscription', 'subscription');
 }
 
-// TODO If web-push-public-key.mjs would export Uint8Array(),
-//      we could remove this method from client code
-function urlB64ToUint8Array (base64String)
-{
-    // eslint-disable-next-line
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-}
-
 async function askForNotificationPermission ()
 {
     if (
@@ -347,7 +328,7 @@ async function createWebPushSubscription ()
     const swRegistration = await navigator.serviceWorker.ready;
     const subscription = await swRegistration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlB64ToUint8Array(WEB_PUSH_PUBLIC_KEY),
+        applicationServerKey: WEB_PUSH_PUBLIC_KEY,
     });
     return subscription;
 }
