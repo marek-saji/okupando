@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/index.css">
+  </head>
+
+  <body
+      data-msg-no-service-worker="First visit main page"
+  >
+    <h1>Google Assistant “integration”</h1>
+
+    <p>
+        Follow this instruction on a device that you want to setup
+        assistant on.
+    </p>
+
+    <noscript>
+        <style>#steps { display: none }</style>
+        <p class="client-not-supported">
+            I am sorry, but you need JavaScript to follow this
+            instruction.
+        </p>
+    </noscript>
+
+    <script>
+        (function () {
+            try
+            {
+                if (
+                    ! navigator
+                    || ! navigator.serviceWorker
+                    || ! navigator.serviceWorker.ready
+                    || ! 'pushManager' in ServiceWorkerRegistration.prototype
+                    || ! navigator.clipboard
+                    || ! navigator.clipboard.writeText
+                )
+                {
+                    throw new Error('Not supported');
+                }
+            }
+            catch (error)
+            {
+                const noStepsStyles = document.createElement('style');
+                noStepsStyles.textContent = '#steps { display: none }';
+                document.body.appendChild(noStepsStyles);
+
+                const info = document.createElement('p');
+                info.textContent = 'I am sorry, but your browser does not support all features needed to setup Google Assistant integration.';
+                info.className = 'client-not-supported';
+                document.body.appendChild(info);
+            }
+        }());
+    </script>
+
+    <ol id=steps start=0>
+        <li>
+            Create account on <a target=_blank href="https://ifttt.com"><abbr title="if this then that">IFTTT</abbr></a>,
+            if you don’t have one.
+        </li>
+        <li>
+            Create
+            <a target=_blank href="https://ifttt.com/create">new <abbr>IFTTT</abbr> applet</a>
+        </li>
+        <li>
+            As <i>this</i> choose
+            <i>Google Assistant</i> and
+            <i>say a simple phrase</i>.
+
+            <p>
+                Enter something like:
+            </p>
+
+            <dl>
+                <dt>What do you want to say?</dt>
+                <dd>Is the toilet free?</dd>
+                <dt>What's another way to say it? </dt>
+                <dd>What’s the toilet situation</dd>
+                <dt>And another way?</dt>
+                <dd>I need to use the loo, please</dd>
+                <dt>What do you want the Assistant to say in response?</dt>
+                <dd>I will let you know when it’s free</dd>
+            </dl>
+        </li>
+        <li>
+            As <i>then</i> choose
+            <i>Webhooks</i>.
+
+            <p>
+                Enter:
+            </p>
+
+            <dt>
+                <dt><abbr>URL</abbr></dt>
+                <dd><var id=origin>adres tej strony</var>/<span>queue</span></dd>
+                <dt>Method</dt>
+                <dd>PUT</dd>
+                <dt>Content Type</dt>
+                <dd>application/json</dd>
+                <dt>Body</dt>
+                <dd>
+                    paste the magic value
+                    (accept any notification requests):
+                    <button
+                        type=button
+                        id=queueDataCopier
+                        data-msg-copied="Magic think copied ✅"
+                    >
+                        Copy magic think to clipboard
+                    </button>
+                </li>
+            </dt>
+        </li>
+        <li>
+            <i lang=fr>et voilà</i>
+        </li>
+    </ol>
+
+    <script type=module src="/google-assistant.mjs"></script>
+  </body>
+</html>
+

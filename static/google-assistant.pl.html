@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/index.css">
+  </head>
+
+  <body
+      data-msg-no-service-worker="Odwiedź najpierw stronę główną"
+  >
+    <h1>„Integracja” z Asystentem Google</h1>
+
+    <p>
+        Instrukcję wykonuj na urządzeniu, na którym chcesz używać
+        asystenta.
+    </p>
+
+    <noscript>
+        <style>#steps { display: none }</style>
+        <p class="client-not-supported">
+            Przykro mi, ale żeby zobaczyć tą instrukcję potrzebny jest
+            JavaScript.
+        </p>
+    </noscript>
+
+    <script>
+        (function () {
+            try
+            {
+                if (
+                    ! navigator
+                    || ! navigator.serviceWorker
+                    || ! navigator.serviceWorker.ready
+                    || ! 'pushManager' in ServiceWorkerRegistration.prototype
+                    || ! navigator.clipboard
+                    || ! navigator.clipboard.writeText
+                )
+                {
+                    throw new Error('Not supported');
+                }
+            }
+            catch (error)
+            {
+                const noStepsStyles = document.createElement('style');
+                noStepsStyles.textContent = '#steps { display: none }';
+                document.body.appendChild(noStepsStyles);
+
+                const info = document.createElement('p');
+                info.textContent = 'Przykro mi, ale Twoja przeglądarka nie obsługuje wszystkich rzeczy potrzebnych, żeby ustawić integrację z Asystentem Google.';
+                info.className = 'client-not-supported';
+                document.body.appendChild(info);
+            }
+        }());
+    </script>
+
+    <ol id=steps start=0>
+        <li>
+            Załóż konto na <a target=_blank href="https://ifttt.com"><abbr lang=en title="if this then that">IFTTT</abbr></a>,
+            jeśli nie masz
+        </li>
+        <li>
+            Stwórz
+            <a target=_blank href="https://ifttt.com/create">nowy aplet na <abbr lang=en>IFTTT</abbr></a>
+        </li>
+        <li>
+            Jako <i lang=en>this</i> wybierz
+            <i lang=en>Google Assistant</i> i
+            <i lang=en>say a simple phrase</i>.
+
+            <p>
+                Niestety póki co nie można zdefiniować fraz po polsku. 😞
+            </p>
+
+            <p>
+                Podaj na przykład:
+            </p>
+
+            <dl lang=en>
+                <dt>What do you want to say?</dt>
+                <dd>Is the toilet free?</dd>
+                <dt>What's another way to say it? </dt>
+                <dd>What’s the toilet situation</dd>
+                <dt>And another way?</dt>
+                <dd>I need to use the loo, please</dd>
+                <dt>What do you want the Assistant to say in response?</dt>
+                <dd>I will let you know when it’s free</dd>
+            </dl>
+        </li>
+        <li>
+            Jako <i lang=en>then</i> wybierz
+            <i lang=en>Webhooks</i>.
+
+            <p>
+                Podaj:
+            </p>
+
+            <dt>
+                <dt><abbr>URL</abbr></dt>
+                <dd><var id=origin>adres tej strony</var>/<span lang=en>queue</span></dd>
+                <dt lang=en>Method</dt>
+                <dd lang=en>PUT</dd>
+                <dt lang=en>Content Type</dt>
+                <dd lang=en>application/json</dd>
+                <dt lang=en>Body</dt>
+                <dd>
+                    wklej magiczną treść
+                    (zaakceptuj <abbr title="ewentualne">ew.</abbr>
+                    prośby o wyświetlenie powiadomień):
+                    <button
+                        type=button
+                        id=queueDataCopier
+                        data-msg-copied="Magiczne coś skopiowane ✅"
+                    >
+                        Skopiuj magiczną treść do schowka
+                    </button>
+                </li>
+            </dt>
+        </li>
+        <li>
+            <i lang=fr>et voilà</i>
+        </li>
+    </ol>
+
+    <script type=module src="/google-assistant.mjs"></script>
+  </body>
+</html>
+

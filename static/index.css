@@ -109,3 +109,9 @@ main
         -webkit-text-stroke: black thin;
     }
 }
+
+
+.client-not-supported
+{
+    color: orangered;
+}
