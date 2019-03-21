@@ -60,7 +60,7 @@ output
     --status-fg: var(--offline-fg);
 }
 
-main
+[data-status]
 {
     color: black;
     background-color: silver;

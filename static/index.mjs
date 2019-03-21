@@ -21,7 +21,7 @@ const WEB_PUSH_SUPPORTED =
 const PUSH_SUPPORTED = WEB_PUSH_SUPPORTED;
 
 const statusBgMetas = document.querySelectorAll('meta[data-status-bg]');
-const main = document.getElementsByTagName('main')[0];
+const statusContainer = document.querySelector('[data-status]');
 const output = document.getElementsByTagName('output')[0];
 const subscribe = document.getElementById('subscribe');
 
@@ -74,7 +74,7 @@ function setup ()
 
     subscribed = subscribe.disabled;
 
-    const status = main.getAttribute('data-status');
+    const status = statusContainer.getAttribute('data-status');
     reflectStatus(status);
     subscribe.addEventListener('click', handleSubscribe);
 }
@@ -164,7 +164,7 @@ async function checkStatus (prevStatus)
 
 async function monitor ()
 {
-    const prevStatus = main.getAttribute('data-status');
+    const prevStatus = statusContainer.getAttribute('data-status');
     const status = await checkStatus(prevStatus);
 
     if (status !== null)
@@ -192,14 +192,15 @@ function reflectStatus (status)
 {
     const name = statusLabels[status];
 
-    main.setAttribute('data-status', status);
+    statusContainer.setAttribute('data-status', status);
     output.textContent = name;
     document.title = `${name} ✦ ${TITLE}`;
 
     subscribe.hidden = status !== statuses.OCCUPIED;
     subscribe.disabled = !!subscribed;
 
-    const statusBgColour = window.getComputedStyle(main).backgroundColor;
+    const statusBgColour =
+        window.getComputedStyle(statusContainer).backgroundColor;
     for (const meta of statusBgMetas)
     {
         meta.content = statusBgColour;
