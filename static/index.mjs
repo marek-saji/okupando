@@ -20,7 +20,7 @@ const WEB_PUSH_SUPPORTED =
     && typeof window.PushManager.prototype.subscribe === 'function';
 const PUSH_SUPPORTED = WEB_PUSH_SUPPORTED;
 
-const themeColor = document.querySelector('meta[name="theme-color"]');
+const statusBgMetas = document.querySelectorAll('meta[data-status-bg]');
 const main = document.getElementsByTagName('main')[0];
 const output = document.getElementsByTagName('output')[0];
 const subscribe = document.getElementById('subscribe');
@@ -199,7 +199,11 @@ function reflectStatus (status)
     subscribe.hidden = status !== statuses.OCCUPIED;
     subscribe.disabled = !!subscribed;
 
-    themeColor.content = window.getComputedStyle(main).backgroundColor;
+    const statusBgColour = window.getComputedStyle(main).backgroundColor;
+    for (const meta of statusBgMetas)
+    {
+        meta.content = statusBgColour;
+    }
 }
 
 function getClientId ()
