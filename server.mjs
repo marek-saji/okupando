@@ -4,7 +4,7 @@ import './lib/cli-env';
 import { values as args } from './lib/args-definitions';
 import app from './lib/express';
 import * as statuses from './static/lib/statuses';
-import { setStatus } from './lib/status';
+import { setStatus, getLastStatusChange, getStatus } from './lib/status';
 import queue from './lib/queue';
 import { notifyAboutFree } from './lib/push';
 import {
@@ -13,6 +13,7 @@ import {
 import {
     createStatusObserver as createDebugStatusObserver,
 } from './lib/status/observer/debug';
+import ws from 'ws';
 
 const ENV = getEnv();
 
@@ -39,6 +40,7 @@ async function startStatusObserver ()
 
     statusObserver.on('change', ({ status }) => {
         setStatus(status);
+        queue.emit('toilet-status-change', { status });
 
         if (status === statuses.FREE)
         {
@@ -89,5 +91,31 @@ function startHttpServer ()
     }
 }
 
+function startWsServer () {
+    const wss = new ws.Server({
+        port: args.WS_PORT,
+    });
+
+    queue.on('toilet-status-change', ({ status }) => {
+        wss.clients.forEach(client => {
+            if (client.readyState === ws.OPEN) {
+                client.send(
+                    JSON.stringify(
+                        { status, lastChange: getLastStatusChange() }
+                    )
+                );
+            }
+        });
+    });
+
+    wss.on('connection', client => {
+        client.send(JSON.stringify({
+            status: getStatus(),
+            lastChange: getLastStatusChange(),
+        }));
+    });
+}
+
 startStatusObserver();
 startHttpServer();
+startWsServer();
