@@ -66,7 +66,39 @@ output
     background-color: silver;
     color: var(--status-fg);
     background-color: var(--status-bg);
+    background-image: radial-gradient(ellipse at center, white 0%, var(--status-bg) 99%)
 }
+
+.toilet-box
+{
+    fill: currentColor;
+}
+
+.illustration svg
+{
+    max-width: 100%;
+    width: auto;
+    height: auto;
+}
+
+
+/* Glitchy error image */
+.illustration svg g > *
+{
+    transition: transform 1s ease-in-out;
+}
+[data-status] .illustration svg
+{
+    overflow: visible;
+}
+[data-status="error"] .illustration svg g > *
+{
+    transform: skewX(var(--skewX, 0deg)) skewY(var(--skewY, 0deg));
+}
+[data-status="error"] .illustration svg > g *:nth-child(3n + 0) { --skewX:  5deg; }
+[data-status="error"] .illustration svg > g *:nth-child(3n + 1) { --skewX: -5deg; }
+[data-status="error"] .illustration svg > g *:nth-child(2n + 1) { --skewY:  5deg; }
+[data-status="error"] .illustration svg > g *:nth-child(2n + 2) { --skewY: -5deg; }
 
 
 #subscribe
@@ -74,6 +106,12 @@ output
     margin-left: 1em;
     margin-right: 1em;
     font-size: 7vw;
+}
+
+#subscribe[hidden]
+{
+    display: inline-block;
+    visibility: hidden;
 }
 
 
