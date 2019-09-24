@@ -34,28 +34,28 @@ tmp.%-background.svg: %.svg
 	convert -background none -density 600 -resize $$( basename "$@" .png | grep -Eo '[0-9]+$$' )x $< $@
 	trimage -f $@
 
-../static/%-maskable.svg: tmp.%-background.svg
+../static/%-maskable.svg: tmp.%-maskable-background.svg
 	$(SVGO) $< -o $@
 
 ../static/%-maskable-32.png: tmp.%-maskable-background.svg
 	convert -background none -density 600 -resize $$( basename "$@" .png | grep -Eo '[0-9]+$$' )x $< $@
 	trimage -f $@
 
-../static/%-maskable-192.png: tmp.%-background.svg
+../static/%-maskable-192.png: tmp.%-maskable-background.svg
 	convert -background none -density 600 -resize $$( basename "$@" .png | grep -Eo '[0-9]+$$' )x $< $@
 	trimage -f $@
 
-../static/%-maskable-512.png: tmp.%-background.svg
+../static/%-maskable-512.png: tmp.%-maskable-background.svg
 	convert -background none -density 600 -resize $$( basename "$@" .png | grep -Eo '[0-9]+$$' )x $< $@
 	trimage -f $@
 
 ../static/%.svg: tmp.%-transparent.svg
 	$(SVGO) $< -o $@
 
-../static/favicon.ico: tmp.icon-transparent.svg
+../static/favicon.ico: favicon.svg
 	convert -background none -density 600 -resize 32x $< $@
 
-../static/%-32.png: tmp.%-transparent.svg
+../static/%-32.png: favicon.svg
 	convert -background none -density 600 -resize $$( basename "$@" .png | grep -Eo '[0-9]+$$' )x $< $@
 	trimage -f $@
 
