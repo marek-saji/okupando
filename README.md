@@ -63,7 +63,6 @@ conduct.
 License
 -------
 
-Licensed under [MIT](./LICENSE).
+Code licensed under [MIT](./LICENSE).
 
-Icon comes from Google Noto Emoji font, which is licensed under
-[SIL Open Font License Version 1.1](./LICENSE-icon).
+Graphics licensed under [Creative Commons BY-NC-SA](./LICENSE-CC-BY-NC-SA.md).
