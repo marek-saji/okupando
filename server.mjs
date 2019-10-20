@@ -14,6 +14,8 @@ import {
     createStatusObserver as createDebugStatusObserver,
 } from './lib/status/observer/debug';
 import ws from 'ws';
+import http from 'http';
+import https from 'https';
 
 const ENV = getEnv();
 
@@ -40,12 +42,7 @@ async function startStatusObserver ()
 
     statusObserver.on('change', ({ status }) => {
         setStatus(status);
-        queue.emit('toilet-status-change', { status });
-
-        if (status === statuses.FREE)
-        {
-            queue.emit('status-change', { status });
-        }
+        queue.emit('status-change', { status, lastChange: getLastStatusChange() });
     });
 
     queue.on('shift', ({ data: { subscription } }) => {
@@ -58,50 +55,30 @@ async function startStatusObserver ()
 
 function startHttpServer ()
 {
-    if (args.HTTPS_PORT)
-    {
-        createHttpsApp(app).listen(
-            args.HTTP_PORT,
-            args.HTTPS_PORT,
-            () => {
-                console.log(
-                    'HTTP',
-                    'Listening on',
-                    `http://${args.HOST}:${args.HTTP_PORT}`,
-                );
-            },
-            () => {
-                console.log(
-                    'HTTP',
-                    'Listening on',
-                    `https://${args.HOST}:${args.HTTPS_PORT}`
-                );
-            },
-        );
+    let server;
+    if (args.HTTPS_PORT) {
+        const httpsApp = createHttpsApp(app);
+        server = https.createServer(httpsApp.tlsOptions)
+            .listen(args.HTTPS_PORT);
+    } else {
+        server = http.createServer().listen(args.HTTP_PORT);
+        server.on('request', app);
     }
-    else
-    {
-        app.listen(args.HTTP_PORT, args.HOST, () => {
-            console.log(
-                'HTTP',
-                'Listening on',
-                `http://${args.HOST}:${args.HTTP_PORT}`
-            );
-        });
-    }
+    return server;
 }
 
-function startWsServer () {
+function startWsServer (server)
+{
     const wss = new ws.Server({
-        port: args.WS_PORT,
+        server,
     });
 
-    queue.on('toilet-status-change', ({ status }) => {
+    queue.on('status-change', ({ status, lastChange }) => {
         wss.clients.forEach(client => {
             if (client.readyState === ws.OPEN) {
                 client.send(
                     JSON.stringify(
-                        { status, lastChange: getLastStatusChange() }
+                        { status, lastChange }
                     )
                 );
             }
@@ -117,5 +94,5 @@ function startWsServer () {
 }
 
 startStatusObserver();
-startHttpServer();
-startWsServer();
+const server = startHttpServer();
+startWsServer(server);
