@@ -3,7 +3,6 @@ import createHttpsApp from './lib/express/greenlock';
 import './lib/cli-env';
 import { values as args } from './lib/args-definitions';
 import app from './lib/express';
-import * as statuses from './static/lib/statuses';
 import { setStatus, getLastStatusChange, getStatus } from './lib/status';
 import queue from './lib/queue';
 import { notifyAboutFree } from './lib/push';
@@ -14,8 +13,6 @@ import {
     createStatusObserver as createDebugStatusObserver,
 } from './lib/status/observer/debug';
 import ws from 'ws';
-import http from 'http';
-import https from 'https';
 
 const ENV = getEnv();
 
@@ -55,16 +52,35 @@ async function startStatusObserver ()
 
 function startHttpServer ()
 {
-    let server;
-    if (args.HTTPS_PORT) {
-        const httpsApp = createHttpsApp(app);
-        server = https.createServer(httpsApp.tlsOptions)
-            .listen(args.HTTPS_PORT);
-    } else {
-        server = http.createServer().listen(args.HTTP_PORT);
-        server.on('request', app);
+    if (args.HTTPS_PORT)
+    {
+        return createHttpsApp(app).listen(
+            args.HTTP_PORT,
+            args.HTTPS_PORT,
+            () => {
+                console.log(
+                    'HTTP',
+                    'Listening on',
+                    `http://${args.HOST}:${args.HTTP_PORT}`,
+                );
+            },
+            () => {
+                console.log(
+                    'HTTP',
+                    'Listening on',
+                    `https://${args.HOST}:${args.HTTPS_PORT}`
+                );
+            },
+        );
     }
-    return server;
+
+    return app.listen(args.HTTP_PORT, args.HOST, () => {
+        console.log(
+            'HTTP',
+            'Listening on',
+            `http://${args.HOST}:${args.HTTP_PORT}`
+        );
+    });
 }
 
 function startWsServer (server)
