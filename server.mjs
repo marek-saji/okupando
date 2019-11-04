@@ -3,8 +3,7 @@ import createHttpsApp from './lib/express/greenlock';
 import './lib/cli-env';
 import { values as args } from './lib/args-definitions';
 import app from './lib/express';
-import * as statuses from './static/lib/statuses';
-import { setStatus } from './lib/status';
+import { setStatus, getLastStatusChange, getStatus } from './lib/status';
 import queue from './lib/queue';
 import { notifyAboutFree } from './lib/push';
 import {
@@ -13,6 +12,7 @@ import {
 import {
     createStatusObserver as createDebugStatusObserver,
 } from './lib/status/observer/debug';
+import ws from 'ws';
 
 const ENV = getEnv();
 
@@ -39,11 +39,7 @@ async function startStatusObserver ()
 
     statusObserver.on('change', ({ status }) => {
         setStatus(status);
-
-        if (status === statuses.FREE)
-        {
-            queue.emit('status-change', { status });
-        }
+        queue.emit('status-change', { status, lastChange: getLastStatusChange() });
     });
 
     queue.on('shift', ({ data: { subscription } }) => {
@@ -58,7 +54,7 @@ function startHttpServer ()
 {
     if (args.HTTPS_PORT)
     {
-        createHttpsApp(app).listen(
+        return createHttpsApp(app).listen(
             args.HTTP_PORT,
             args.HTTPS_PORT,
             () => {
@@ -77,17 +73,42 @@ function startHttpServer ()
             },
         );
     }
-    else
-    {
-        app.listen(args.HTTP_PORT, args.HOST, () => {
-            console.log(
-                'HTTP',
-                'Listening on',
-                `http://${args.HOST}:${args.HTTP_PORT}`
-            );
+
+    return app.listen(args.HTTP_PORT, args.HOST, () => {
+        console.log(
+            'HTTP',
+            'Listening on',
+            `http://${args.HOST}:${args.HTTP_PORT}`
+        );
+    });
+}
+
+function startWsServer (server)
+{
+    const wss = new ws.Server({
+        server,
+    });
+
+    queue.on('status-change', ({ status, lastChange }) => {
+        wss.clients.forEach(client => {
+            if (client.readyState === ws.OPEN) {
+                client.send(
+                    JSON.stringify(
+                        { status, lastChange }
+                    )
+                );
+            }
         });
-    }
+    });
+
+    wss.on('connection', client => {
+        client.send(JSON.stringify({
+            status: getStatus(),
+            lastChange: getLastStatusChange(),
+        }));
+    });
 }
 
 startStatusObserver();
-startHttpServer();
+const server = startHttpServer();
+startWsServer(server);
