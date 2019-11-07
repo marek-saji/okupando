@@ -20,10 +20,10 @@ async function startStatusObserver ()
 {
     let statusObserver;
 
-    if (args.GPIO_CHANNEL)
+    if (args.BUTTON_GPIO_CHANNEL)
     {
         statusObserver = await createGpioStatusObserver({
-            channel: args.GPIO_CHANNEL,
+            channel: args.BUTTON_GPIO_CHANNEL,
         });
     }
     else if (ENV === 'development')
@@ -33,7 +33,7 @@ async function startStatusObserver ()
     }
     else
     {
-        throw new Error('GPIO_CHANNEL not configured');
+        throw new Error('BUTTON_GPIO_CHANNEL not configured');
     }
 
     statusObserver.on('change', ({ status }) => {

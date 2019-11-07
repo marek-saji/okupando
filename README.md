@@ -11,10 +11,14 @@ Running
 You need to run it on Raspberry Pi.
 
 After usual cloning and `npm install`ing, run
-`npm start -- --gpio-channel GPIO`, where `GPIO` is Broadcom pin number
-(BCM/GPIO) where you have your microswitch plugged in. You may use e.g.
-`pinout` (from `python3-gpiozero`) to see the layout or visit
-https://pinout.xyz/.
+
+```
+npm start -- --button-gpio-channel BUTTON_GPIO
+```
+
+where `BUTTON_GPIO` is Broadcom pin number (BCM/GPIO) where you have
+your microswitch plugged in. You may use e.g. `pinout` (from
+`python3-gpiozero`) to see the layout or visit https://pinout.xyz/.
 
 By default server will run with no HTTPS and push notifications,
 run `npm start -- --help` to see how to configure those.
@@ -43,11 +47,12 @@ interval of 200ms.
 Developing
 ----------
 
-Running server with no `--gpio-channel` and `NODE_ENV=development` will
-start debug mode when you can change status with keypresses.
-Run `npm run dev` to run server that restarts on every file change.
-No browser reload at this point, though. To make push work on localhost
-use something like [site.js](https://sitejs.org/) for HTTPS.
+Running server with no `--button-gpio-channel` and
+`NODE_ENV=development` will start debug mode when you can change status
+with keypresses.  Run `npm run dev` to run server that restarts on every
+file change. No browser reload at this point, though. To make push work
+on localhost use something like [site.js](https://sitejs.org/) for
+HTTPS.
 
 Run `npm start -- --help` for all available options.
 
