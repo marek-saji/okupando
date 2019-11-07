@@ -13,12 +13,13 @@ You need to run it on Raspberry Pi.
 After usual cloning and `npm install`ing, run
 
 ```
-npm start -- --button-gpio-channel BUTTON_GPIO
+npm start -- --button-gpio-channel BUTTON_GPIO --light-gpio-channel LIGHT_GPIO
 ```
 
 where `BUTTON_GPIO` is Broadcom pin number (BCM/GPIO) where you have
-your microswitch plugged in. You may use e.g. `pinout` (from
-`python3-gpiozero`) to see the layout or visit https://pinout.xyz/.
+your microswitch plugged in and `LIGHT_GPIO` is your status indicator
+diode. You may use e.g. `pinout` (from `python3-gpiozero`) to see the
+layout or visit https://pinout.xyz/.
 
 By default server will run with no HTTPS and push notifications,
 run `npm start -- --help` to see how to configure those.

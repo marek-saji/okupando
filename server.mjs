@@ -12,9 +12,28 @@ import {
 import {
     createStatusObserver as createDebugStatusObserver,
 } from './lib/status/observer/debug';
+import {
+    createStatusIndicator as createGpioStatusIndicator,
+} from './lib/status/indicator/gpio';
 import ws from 'ws';
 
 const ENV = getEnv();
+
+async function startStatusIndicator ()
+{
+    if (!args.LIGHT_GPIO_CHANNEL)
+    {
+        return;
+    }
+
+    const indicator = await createGpioStatusIndicator({
+        channel: args.LIGHT_GPIO_CHANNEL,
+    });
+
+    queue.on('status-change', () => {
+        indicator.set(queue.getStatusForClient());
+    });
+}
 
 async function startStatusObserver ()
 {
@@ -108,6 +127,7 @@ function startWsServer (server)
     });
 }
 
+startStatusIndicator();
 startStatusObserver();
 const server = startHttpServer();
 startWsServer(server);
