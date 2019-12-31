@@ -113,6 +113,12 @@ function handleSwMessage ({ data })
     {
         checkAbortController.abort();
         checkAbortController = new AbortController();
+
+        if (status === statuses.FREE)
+        {
+            subscribed = null;
+        }
+
         reflectStatus(status);
     }
 }
