@@ -12,18 +12,37 @@ import {
 import {
     createStatusObserver as createDebugStatusObserver,
 } from './lib/status/observer/debug';
+import {
+    createStatusIndicator as createGpioStatusIndicator,
+} from './lib/status/indicator/gpio';
 import ws from 'ws';
 
 const ENV = getEnv();
+
+async function startStatusIndicator ()
+{
+    if (!args.LIGHT_GPIO_CHANNEL)
+    {
+        return;
+    }
+
+    const indicator = await createGpioStatusIndicator({
+        channel: args.LIGHT_GPIO_CHANNEL,
+    });
+
+    queue.on('status-change', () => {
+        indicator.set(queue.getStatusForClient());
+    });
+}
 
 async function startStatusObserver ()
 {
     let statusObserver;
 
-    if (args.GPIO_CHANNEL)
+    if (args.BUTTON_GPIO_CHANNEL)
     {
         statusObserver = await createGpioStatusObserver({
-            channel: args.GPIO_CHANNEL,
+            channel: args.BUTTON_GPIO_CHANNEL,
         });
     }
     else if (ENV === 'development')
@@ -33,7 +52,7 @@ async function startStatusObserver ()
     }
     else
     {
-        throw new Error('GPIO_CHANNEL not configured');
+        throw new Error('BUTTON_GPIO_CHANNEL not configured');
     }
 
     statusObserver.on('change', ({ status }) => {
@@ -108,6 +127,7 @@ function startWsServer (server)
     });
 }
 
+startStatusIndicator();
 startStatusObserver();
 const server = startHttpServer();
 startWsServer(server);
