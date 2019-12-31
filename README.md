@@ -46,7 +46,8 @@ Developing
 Running server with no `--gpio-channel` and `NODE_ENV=development` will
 start debug mode when you can change status with keypresses.
 Run `npm run dev` to run server that restarts on every file change.
-No browser reload at this point, though.
+No browser reload at this point, though. To make push work on localhost
+use something like [site.js](https://sitejs.org/) for HTTPS.
 
 Run `npm start -- --help` for all available options.
 
