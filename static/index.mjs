@@ -9,7 +9,7 @@ import { HTTP_STATUS_OK } from './lib/http-status-codes.mjs';
 
 const SEC_MS = 1000; // miliseconds in a second
 
-const INTERVAL = 3000;
+const INTERVAL = 1000;
 const NOTIFICATICATION_PERMISSION_TIMEOUT = 10000;
 
 const TITLE = document.title;
