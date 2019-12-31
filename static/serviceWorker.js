@@ -44,7 +44,8 @@ async function handlePush (jsonData)
     } = JSON.parse(jsonData);
     self.registration.showNotification(title, options);
 
-    (await clients.matchAll({ type: 'window' })).forEach(client => {
+    await self.clients.claim();
+    (await self.clients.matchAll({ type: 'window' })).forEach(client => {
         client.postMessage({
             status,
         });
