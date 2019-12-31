@@ -25,7 +25,7 @@ const statusContainer = document.querySelector('[data-status]');
 const output = document.getElementsByTagName('output')[0];
 const subscribe = document.getElementById('subscribe');
 
-const checkAbortController = AbortController && new AbortController();
+let checkAbortController = AbortController && new AbortController();
 
 let version;
 let subscribed = false;
@@ -112,6 +112,7 @@ function handleSwMessage ({ data })
     if (status)
     {
         checkAbortController.abort();
+        checkAbortController = new AbortController();
         reflectStatus(status);
     }
 }
