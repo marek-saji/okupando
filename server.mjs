@@ -16,7 +16,6 @@ import ws from 'ws';
 
 const ENV = getEnv();
 
-
 async function startStatusObserver ()
 {
     let statusObserver;
@@ -89,14 +88,14 @@ function startWsServer (server)
         server,
     });
 
-    queue.on('status-change', ({ status, lastChange }) => {
+    queue.on('status-change', ({ lastChange }) => {
         wss.clients.forEach(client => {
-            if (client.readyState === ws.OPEN) {
-                client.send(
-                    JSON.stringify(
-                        { status, lastChange }
-                    )
-                );
+            if (client.readyState === ws.OPEN)
+            {
+                client.send(JSON.stringify({
+                    status: getStatus(),
+                    lastChange,
+                }));
             }
         });
     });
