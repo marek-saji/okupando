@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DietLabs/okupando.git"
+    "url": "git+https://github.com/marek-saji/okupando.git"
   },
   "keywords": [
     "toilet",
@@ -27,9 +27,9 @@
   "author": "Marek ‘saji’ Augustynowicz <marek.aug@gmail.com> (http://noplacelikecode.redrice.io/)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/DietLabs/okupando/issues"
+    "url": "https://github.com/marek-saji/okupando/issues"
   },
-  "homepage": "https://github.com/DietLabs/okupando#readme",
+  "homepage": "https://github.com/marek-saji/okupando#readme",
   "engines": {
     "node": ">=8.0.0"
   },

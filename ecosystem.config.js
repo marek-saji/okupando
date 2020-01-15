@@ -32,7 +32,7 @@ module.exports = {
     deploy: {
         production: {
             ...deployConfig,
-            repo: 'https://github.com/DietLabs/okupando',
+            repo: 'https://github.com/marek-saji/okupando',
             ref: 'origin/master',
             'post-deploy': 'npm install --no-package-lock && pm2 reload --env=production ./ecosystem.config.js',
         },
