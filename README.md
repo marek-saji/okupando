@@ -74,6 +74,6 @@ conduct.
 License
 -------
 
-Code licensed under [MIT](./LICENSE).
+Code licensed under [ISC](./LICENSE).
 
 Graphics licensed under [Creative Commons BY-NC-SA](./LICENSE-CC-BY-NC-SA.md).
