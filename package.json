@@ -43,7 +43,7 @@
     "shortid": "^2.2.14",
     "web-push": "^3.3.3",
     "whatwg-url": "^7.0.0",
-    "ws": "^7.1.2"
+    "ws": "^7.4.6"
   },
   "devDependencies": {
     "eslint": "^5.13.0"
