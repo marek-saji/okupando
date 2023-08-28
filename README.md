@@ -1,6 +1,8 @@
 okupando 🚽🐼
 =============
 
+📢 **No longer actively maintained.**
+
 Single-page application with single-task focus -- checking if the toilet
 is occupied or not.
 
